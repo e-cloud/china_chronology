@@ -9,9 +9,4 @@ import java.util.List;
  * @param eras      年号列表
  * @param ganzhi    六十甲子列表
  */
-public record ChronologyDataset(
-        List<Dynasty> dynasties,
-        List<Era> eras,
-        List<GanzhiItem> ganzhi
-) {
-}
+public record ChronologyDataset(List<Dynasty> dynasties, List<Era> eras, List<GanzhiItem> ganzhi) {}

@@ -9,11 +9,4 @@ package io.github.ecloud.chronology.model;
  * @param eraYear       年号第几年
  * @param ganzhi        天干地支
  */
-public record GregorianMatchResult(
-        int gregorianYear,
-        String dynastyName,
-        String eraName,
-        int eraYear,
-        String ganzhi
-) {
-}
+public record GregorianMatchResult(int gregorianYear, String dynastyName, String eraName, int eraYear, String ganzhi) {}

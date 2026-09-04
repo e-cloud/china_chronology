@@ -15,12 +15,4 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Era(
-        int id,
-        int dynastyId,
-        String dynastyName,
-        String rawDynastyName,
-        String name,
-        int startYear,
-        int endYear
-) {
-}
+        int id, int dynastyId, String dynastyName, String rawDynastyName, String name, int startYear, int endYear) {}

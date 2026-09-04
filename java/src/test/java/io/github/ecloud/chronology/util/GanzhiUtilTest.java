@@ -1,13 +1,12 @@
 package io.github.ecloud.chronology.util;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * 干支历法计算单元测试
@@ -72,13 +71,10 @@ class GanzhiUtilTest {
     @DisplayName("在给定年份范围内检索干支年份")
     void shouldFindYearsByGanzhiInRange() {
         // 1600-1650 年间的甲申年
-        assertThat(GanzhiUtil.ganzhiToGregorian("甲申", 1600, 1650))
-                .containsExactly(1644);
+        assertThat(GanzhiUtil.ganzhiToGregorian("甲申", 1600, 1650)).containsExactly(1644);
         // 1900-2000 年间的甲子年
-        assertThat(GanzhiUtil.ganzhiToGregorian("甲子", 1900, 2000))
-                .containsExactly(1924, 1984);
+        assertThat(GanzhiUtil.ganzhiToGregorian("甲子", 1900, 2000)).containsExactly(1924, 1984);
         // 跨公元前后区间（-2 到 2，测试过滤 0 年逻辑）
-        assertThat(GanzhiUtil.ganzhiToGregorian("庚申", -2, 2))
-                .containsExactly(-1);
+        assertThat(GanzhiUtil.ganzhiToGregorian("庚申", -2, 2)).containsExactly(-1);
     }
 }

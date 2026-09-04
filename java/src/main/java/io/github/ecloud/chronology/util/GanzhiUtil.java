@@ -9,13 +9,9 @@ import java.util.List;
  */
 public final class GanzhiUtil {
 
-    private static final String[] TIANGAN = {
-            "甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"
-    };
+    private static final String[] TIANGAN = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"};
 
-    private static final String[] DIZHI = {
-            "子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"
-    };
+    private static final String[] DIZHI = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"};
 
     /**
      * 六十甲子干支表（只读）

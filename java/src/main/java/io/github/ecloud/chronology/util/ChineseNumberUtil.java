@@ -24,8 +24,7 @@ public final class ChineseNumberUtil {
         CN_NUM_MAP.put('九', 9);
     }
 
-    private ChineseNumberUtil() {
-    }
+    private ChineseNumberUtil() {}
 
     /**
      * 将中文纪年数字或阿拉伯数字解析为正整数

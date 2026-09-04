@@ -5,7 +5,6 @@ import io.github.ecloud.chronology.model.Era;
 import io.github.ecloud.chronology.model.EraMatchResult;
 import io.github.ecloud.chronology.model.GregorianMatchResult;
 import io.github.ecloud.chronology.model.ParsedEraQuery;
-
 import java.util.List;
 
 /**

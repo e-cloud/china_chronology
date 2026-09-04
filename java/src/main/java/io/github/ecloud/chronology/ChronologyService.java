@@ -9,7 +9,6 @@ import io.github.ecloud.chronology.model.GregorianMatchResult;
 import io.github.ecloud.chronology.model.ParsedEraQuery;
 import io.github.ecloud.chronology.util.ChineseNumberUtil;
 import io.github.ecloud.chronology.util.GanzhiUtil;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -235,7 +234,9 @@ public class ChronologyService {
         }
 
         // 若用户直接输入了纯年号或朝代+年号且无年份数字（含带'年'字），抛出明确异常，防止误吞
-        String withoutNian = trimmed.endsWith("年") ? trimmed.substring(0, trimmed.length() - 1).trim() : trimmed;
+        String withoutNian = trimmed.endsWith("年")
+                ? trimmed.substring(0, trimmed.length() - 1).trim()
+                : trimmed;
         if (this.eraNamesSet.contains(trimmed) || this.eraNamesSet.contains(withoutNian)) {
             throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
         }
@@ -332,13 +333,7 @@ public class ChronologyService {
                 String displayStr = eraYearNum == 1 ? "元" : String.valueOf(eraYearNum);
 
                 matches.add(new EraMatchResult(
-                        era.dynastyName(),
-                        era.name(),
-                        eraYearNum,
-                        era.name() + displayStr + "年",
-                        year,
-                        ganzhi
-                ));
+                        era.dynastyName(), era.name(), eraYearNum, era.name() + displayStr + "年", year, ganzhi));
             }
         }
 
@@ -413,12 +408,7 @@ public class ChronologyService {
 
             if (calcYear <= era.endYear()) {
                 results.add(new GregorianMatchResult(
-                        calcYear,
-                        era.dynastyName(),
-                        era.name(),
-                        eraYear,
-                        this.gregorianToGanzhi(calcYear)
-                ));
+                        calcYear, era.dynastyName(), era.name(), eraYear, this.gregorianToGanzhi(calcYear)));
             }
         }
 

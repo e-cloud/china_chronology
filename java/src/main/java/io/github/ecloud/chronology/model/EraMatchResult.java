@@ -11,11 +11,4 @@ package io.github.ecloud.chronology.model;
  * @param ganzhi         对应干支
  */
 public record EraMatchResult(
-        String dynastyName,
-        String eraName,
-        int eraYear,
-        String eraYearDisplay,
-        int gregorianYear,
-        String ganzhi
-) {
-}
+        String dynastyName, String eraName, int eraYear, String eraYearDisplay, int gregorianYear, String ganzhi) {}

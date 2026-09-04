@@ -9,11 +9,7 @@ import java.util.Optional;
  * @param eraName     年号名称（如 "贞观"）
  * @param eraYear     年号年份序号（如 1、8）
  */
-public record ParsedEraQuery(
-        String dynastyName,
-        String eraName,
-        int eraYear
-) {
+public record ParsedEraQuery(String dynastyName, String eraName, int eraYear) {
     /**
      * 获取朝代名称 Optional
      */

@@ -1,18 +1,16 @@
 package io.github.ecloud.chronology;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.github.ecloud.chronology.model.Dynasty;
 import io.github.ecloud.chronology.model.Era;
 import io.github.ecloud.chronology.model.EraMatchResult;
 import io.github.ecloud.chronology.model.GregorianMatchResult;
 import io.github.ecloud.chronology.model.ParsedEraQuery;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * 静态工具门面类单元测试
