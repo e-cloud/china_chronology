@@ -236,6 +236,46 @@ describe("ChronologyService 核心互转与消歧", () => {
       ]);
     });
 
+    it("两宋别名消歧（宋/南宋/北宋）", () => {
+      // 南宋绍兴元年 (1131年，辛亥)
+      const resNanSong = service.eraToGregorian("南宋绍兴元年");
+      expect(resNanSong).toEqual([
+        { gregorianYear: 1131, dynastyName: "宋", eraName: "绍兴", eraYear: 1, ganzhi: "辛亥" }
+      ]);
+
+      // 北宋熙宁十年 (1077年，丁巳)
+      const resBeiSong = service.eraToGregorian("北宋熙宁十年");
+      expect(resBeiSong).toEqual([
+        { gregorianYear: 1077, dynastyName: "宋", eraName: "熙宁", eraYear: 10, ganzhi: "丁巳" }
+      ]);
+
+      // 通称宋绍兴元年
+      const resSong = service.eraToGregorian("宋绍兴元年");
+      expect(resSong).toEqual([
+        { gregorianYear: 1131, dynastyName: "宋", eraName: "绍兴", eraYear: 1, ganzhi: "辛亥" }
+      ]);
+    });
+
+    it("魏朝与北魏消歧及刘宋朝代支持", () => {
+      // 北魏太和二十年 (496年，丙子)
+      const resBeiWei = service.eraToGregorian("北魏太和二十年");
+      expect(resBeiWei).toEqual([
+        { gregorianYear: 496, dynastyName: "北魏", eraName: "太和", eraYear: 20, ganzhi: "丙子" }
+      ]);
+
+      // 通称魏太和二十年（太和在位477-499，20年仅北魏存在）
+      const resWei = service.eraToGregorian("魏太和二十年");
+      expect(resWei).toContainEqual(
+        { gregorianYear: 496, dynastyName: "北魏", eraName: "太和", eraYear: 20, ganzhi: "丙子" }
+      );
+
+      // 刘宋元嘉元年 (424年，甲子)
+      const resLiuSong = service.eraToGregorian("刘宋元嘉元年");
+      expect(resLiuSong).toEqual([
+        { gregorianYear: 424, dynastyName: "刘宋", eraName: "元嘉", eraYear: 1, ganzhi: "甲子" }
+      ]);
+    });
+
     it("繁体字清洗后的年号（地节、鸿嘉、居摄）正常检索", () => {
       // 汉宣帝 地节元年 (-69年)
       expect(service.eraToGregorian("汉地节元年")).toEqual([

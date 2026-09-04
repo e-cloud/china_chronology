@@ -19,7 +19,8 @@ export const DYNASTY_ALIASES: Record<string, string[]> = {
   齐: ["南齐", "北齐", "齐"],
   南齐: ["齐", "南齐"],
   北齐: ["齐", "北齐"],
-  秦: ["前秦", "后秦", "西秦", "秦"],
+  秦: ["嬴秦", "前秦", "后秦", "西秦", "秦"],
+  嬴秦: ["秦", "嬴秦"],
   前秦: ["秦", "前秦"],
   后秦: ["秦", "后秦"],
   西秦: ["秦", "西秦"],
@@ -37,9 +38,12 @@ export const DYNASTY_ALIASES: Record<string, string[]> = {
   后燕: ["燕", "后燕"],
   南燕: ["燕", "南燕"],
   北燕: ["燕", "北燕"],
-  魏: ["三国魏", "曹魏", "魏"],
+  魏: ["三国魏", "曹魏", "北魏", "西魏", "东魏", "魏"],
   曹魏: ["三国魏", "曹魏", "魏"],
   三国魏: ["三国魏", "曹魏", "魏"],
+  北魏: ["魏", "北魏"],
+  东魏: ["魏", "东魏"],
+  西魏: ["魏", "西魏"],
   蜀: ["三国蜀", "蜀汉", "蜀"],
   蜀汉: ["三国蜀", "蜀汉", "蜀"],
   三国蜀: ["三国蜀", "蜀汉", "蜀"],
@@ -48,7 +52,13 @@ export const DYNASTY_ALIASES: Record<string, string[]> = {
   东吴: ["三国吴", "孙吴", "东吴", "吴"],
   三国吴: ["三国吴", "孙吴", "东吴", "吴"],
   武周: ["周", "武周"],
-  周: ["周", "武周", "北周", "后周"]
+  周: ["周", "武周", "北周", "后周"],
+  宋: ["宋", "南宋", "北宋"],
+  南宋: ["宋", "南宋"],
+  北宋: ["宋", "北宋"],
+  刘宋: ["刘宋", "宋(刘)", "宋（刘）"],
+  杨吴: ["杨吴", "吴(杨)", "吴（杨）"],
+  马楚: ["马楚", "楚(马)", "楚（马）"]
 };
 
 function matchDynasty(target: string, eraDynasty: string, eraRawDynasty?: string): boolean {
@@ -125,18 +135,28 @@ export class ChronologyService {
    * 解析自然语言纪年字符串
    */
   parseEraString(input: string): ParsedEraQuery {
+    if (!input) {
+      throw new Error(`无法匹配年号格式: "${input}"`);
+    }
     const trimmed = input.trim();
     if (!trimmed) {
       throw new Error(`无法匹配年号格式: "${input}"`);
     }
 
-    // 若用户直接输入了纯年号或朝代+年号且无年份数字，抛出明确异常，防止将年号末尾“元”误吞为元年
-    if (this.eraNamesSet.has(trimmed)) {
+    // 若用户直接输入了纯年号或朝代+年号且无年份数字（含末尾带'年'），抛出明确异常，防止误吞
+    const withoutNian = trimmed.endsWith("年") ? trimmed.slice(0, -1).trim() : trimmed;
+    if (this.eraNamesSet.has(trimmed) || this.eraNamesSet.has(withoutNian)) {
       throw new Error(`输入缺少有效的年份数字: "${input}"`);
     }
     for (const d of this.sortedDynasties) {
       if (trimmed.startsWith(d.name)) {
         const remaining = trimmed.slice(d.name.length).trim();
+        if (this.eraNamesSet.has(remaining)) {
+          throw new Error(`输入缺少有效的年份数字: "${input}"`);
+        }
+      }
+      if (withoutNian.startsWith(d.name)) {
+        const remaining = withoutNian.slice(d.name.length).trim();
         if (this.eraNamesSet.has(remaining)) {
           throw new Error(`输入缺少有效的年份数字: "${input}"`);
         }

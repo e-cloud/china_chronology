@@ -85,15 +85,37 @@ describe("ChronologyService parseEraString 自然语言解析", () => {
     });
   });
 
-  it("当仅输入年号而缺少年份数字时应抛出对应异常（防止吞字）", () => {
+  it("当仅输入年号而缺少年份数字时应抛出对应异常（防止吞字，含带年字输入）", () => {
     expect(() => service.parseEraString("开元")).toThrow("输入缺少有效的年份数字");
     expect(() => service.parseEraString("唐开元")).toThrow("输入缺少有效的年份数字");
     expect(() => service.parseEraString("崇祯")).toThrow("输入缺少有效的年份数字");
+    expect(() => service.parseEraString("开元年")).toThrow("输入缺少有效的年份数字");
+    expect(() => service.parseEraString("唐开元年")).toThrow("输入缺少有效的年份数字");
+    expect(() => service.parseEraString("明崇祯年")).toThrow("输入缺少有效的年份数字");
+  });
+
+  it("以元结尾年号后接元年应正确解析", () => {
+    const res = service.parseEraString("开元元年");
+    expect(res).toEqual({
+      eraName: "开元",
+      eraYear: 1
+    });
+
+    const resTang = service.parseEraString("唐开元元年");
+    expect(resTang).toEqual({
+      dynastyName: "唐",
+      eraName: "开元",
+      eraYear: 1
+    });
   });
 
   it("非法输入应抛出对应异常", () => {
     expect(() => service.parseEraString("")).toThrow("无法匹配年号格式");
+    expect(() => service.parseEraString("   ")).toThrow("无法匹配年号格式");
+    expect(() => service.parseEraString(null as unknown as string)).toThrow("无法匹配年号格式");
+    expect(() => service.parseEraString(undefined as unknown as string)).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString("abcd")).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString("十年")).toThrow("输入缺少有效的年号名称");
+    expect(() => service.parseEraString("贞观0年")).toThrow("非法的年号年份");
   });
 });

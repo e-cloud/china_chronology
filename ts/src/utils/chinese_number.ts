@@ -3,12 +3,22 @@
  * 支持 "元" -> 1, "十七" -> 17, "61" -> 61, "二十" -> 20, "六十一" -> 61
  */
 export function parseEraYearNumber(yearStr: string): number {
+  if (!yearStr) {
+    throw new Error(`无法识别年份数字: "${yearStr}"`);
+  }
   const trimmed = yearStr.trim();
   if (/^\d+$/.test(trimmed)) {
-    return parseInt(trimmed, 10);
+    const num = parseInt(trimmed, 10);
+    if (num <= 0) {
+      throw new Error(`非法的年号年份: "${yearStr}"`);
+    }
+    return num;
   }
   if (trimmed === "元") {
     return 1;
+  }
+  if (trimmed === "零") {
+    throw new Error(`非法的年号年份: "${yearStr}"`);
   }
 
   const cnNumMap: Record<string, number> = {

@@ -111,5 +111,13 @@ class ChineseNumberUtilTest {
         assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("卅零"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("无法识别年份数字");
+
+        assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("0"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("非法的年号年份");
+
+        assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("零"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("非法的年号年份");
     }
 }

@@ -51,7 +51,8 @@ public class ChronologyService {
         map.put("齐", List.of("南齐", "北齐", "齐"));
         map.put("南齐", List.of("齐", "南齐"));
         map.put("北齐", List.of("齐", "北齐"));
-        map.put("秦", List.of("前秦", "后秦", "西秦", "秦"));
+        map.put("秦", List.of("嬴秦", "前秦", "后秦", "西秦", "秦"));
+        map.put("嬴秦", List.of("秦", "嬴秦"));
         map.put("前秦", List.of("秦", "前秦"));
         map.put("后秦", List.of("秦", "后秦"));
         map.put("西秦", List.of("秦", "西秦"));
@@ -69,9 +70,12 @@ public class ChronologyService {
         map.put("后燕", List.of("燕", "后燕"));
         map.put("南燕", List.of("燕", "南燕"));
         map.put("北燕", List.of("燕", "北燕"));
-        map.put("魏", List.of("三国魏", "曹魏", "魏"));
+        map.put("魏", List.of("三国魏", "曹魏", "北魏", "西魏", "东魏", "魏"));
         map.put("曹魏", List.of("三国魏", "曹魏", "魏"));
         map.put("三国魏", List.of("三国魏", "曹魏", "魏"));
+        map.put("北魏", List.of("魏", "北魏"));
+        map.put("东魏", List.of("魏", "东魏"));
+        map.put("西魏", List.of("魏", "西魏"));
         map.put("蜀", List.of("三国蜀", "蜀汉", "蜀"));
         map.put("蜀汉", List.of("三国蜀", "蜀汉", "蜀"));
         map.put("三国蜀", List.of("三国蜀", "蜀汉", "蜀"));
@@ -81,6 +85,12 @@ public class ChronologyService {
         map.put("三国吴", List.of("三国吴", "孙吴", "东吴", "吴"));
         map.put("武周", List.of("周", "武周"));
         map.put("周", List.of("周", "武周", "北周", "后周"));
+        map.put("宋", List.of("宋", "南宋", "北宋"));
+        map.put("南宋", List.of("宋", "南宋"));
+        map.put("北宋", List.of("宋", "北宋"));
+        map.put("刘宋", List.of("刘宋", "宋(刘)", "宋（刘）"));
+        map.put("杨吴", List.of("杨吴", "吴(杨)", "吴（杨）"));
+        map.put("马楚", List.of("马楚", "楚(马)", "楚（马）"));
         DYNASTY_ALIASES = Collections.unmodifiableMap(map);
     }
 
@@ -224,13 +234,20 @@ public class ChronologyService {
             throw new IllegalArgumentException("无法匹配年号格式: \"" + input + "\"");
         }
 
-        // 若用户直接输入了纯年号或朝代+年号且无年份数字，抛出明确异常，防止将年号末尾“元”误吞为元年
-        if (this.eraNamesSet.contains(trimmed)) {
+        // 若用户直接输入了纯年号或朝代+年号且无年份数字（含带'年'字），抛出明确异常，防止误吞
+        String withoutNian = trimmed.endsWith("年") ? trimmed.substring(0, trimmed.length() - 1).trim() : trimmed;
+        if (this.eraNamesSet.contains(trimmed) || this.eraNamesSet.contains(withoutNian)) {
             throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
         }
         for (String dName : this.sortedDynasties) {
             if (trimmed.startsWith(dName)) {
                 String remaining = trimmed.substring(dName.length()).trim();
+                if (this.eraNamesSet.contains(remaining)) {
+                    throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
+                }
+            }
+            if (withoutNian.startsWith(dName)) {
+                String remaining = withoutNian.substring(dName.length()).trim();
                 if (this.eraNamesSet.contains(remaining)) {
                     throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
                 }

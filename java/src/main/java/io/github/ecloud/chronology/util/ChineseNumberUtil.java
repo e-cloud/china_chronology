@@ -45,11 +45,19 @@ public final class ChineseNumberUtil {
         }
 
         if (trimmed.matches("^\\d+$")) {
-            return Integer.parseInt(trimmed);
+            int val = Integer.parseInt(trimmed);
+            if (val <= 0) {
+                throw new IllegalArgumentException("非法的年号年份: \"" + yearStr + "\"");
+            }
+            return val;
         }
 
         if ("元".equals(trimmed)) {
             return 1;
+        }
+
+        if ("零".equals(trimmed)) {
+            throw new IllegalArgumentException("非法的年号年份: \"" + yearStr + "\"");
         }
 
         // 支持古典文献中的 "廿" (20) 与 "卅" (30)

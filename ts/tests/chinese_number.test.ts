@@ -59,5 +59,7 @@ describe("parseEraYearNumber", () => {
     expect(() => parseEraYearNumber("十十")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("廿零")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("卅零")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("0")).toThrow("非法的年号年份");
+    expect(() => parseEraYearNumber("零")).toThrow("非法的年号年份");
   });
 });

@@ -225,6 +225,50 @@ class ChronologyServiceTest {
     }
 
     @Test
+    @DisplayName("两宋别名消歧（宋/南宋/北宋）")
+    void shouldDisambiguateSongDynasty() {
+        // 南宋绍兴元年 (1131年，辛亥)
+        List<GregorianMatchResult> resNanSong = service.eraToGregorian("南宋绍兴元年");
+        assertThat(resNanSong).containsExactly(
+                new GregorianMatchResult(1131, "宋", "绍兴", 1, "辛亥")
+        );
+
+        // 北宋熙宁十年 (1077年，丁巳)
+        List<GregorianMatchResult> resBeiSong = service.eraToGregorian("北宋熙宁十年");
+        assertThat(resBeiSong).containsExactly(
+                new GregorianMatchResult(1077, "宋", "熙宁", 10, "丁巳")
+        );
+
+        // 通称宋绍兴元年
+        List<GregorianMatchResult> resSong = service.eraToGregorian("宋绍兴元年");
+        assertThat(resSong).containsExactly(
+                new GregorianMatchResult(1131, "宋", "绍兴", 1, "辛亥")
+        );
+    }
+
+    @Test
+    @DisplayName("魏朝与北魏消歧及刘宋朝代支持")
+    void shouldDisambiguateNorthernWeiAndLiuSong() {
+        // 北魏太和二十年 (496年，丙子)
+        List<GregorianMatchResult> resBeiWei = service.eraToGregorian("北魏太和二十年");
+        assertThat(resBeiWei).containsExactly(
+                new GregorianMatchResult(496, "北魏", "太和", 20, "丙子")
+        );
+
+        // 通称魏太和二十年（太和在位477-499，20年仅北魏存在）
+        List<GregorianMatchResult> resWei = service.eraToGregorian("魏太和二十年");
+        assertThat(resWei).contains(
+                new GregorianMatchResult(496, "北魏", "太和", 20, "丙子")
+        );
+
+        // 刘宋元嘉元年 (424年，甲子)
+        List<GregorianMatchResult> resLiuSong = service.eraToGregorian("刘宋元嘉元年");
+        assertThat(resLiuSong).containsExactly(
+                new GregorianMatchResult(424, "刘宋", "元嘉", 1, "甲子")
+        );
+    }
+
+    @Test
     @DisplayName("繁体字清洗后的年号（地节、鸿嘉、居摄）正常检索")
     void shouldFindCleanedEraNames() {
         // 汉宣帝 地节元年 (-69年)

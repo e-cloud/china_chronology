@@ -90,7 +90,7 @@ class ChronologyParserTest {
     }
 
     @Test
-    @DisplayName("当仅输入年号而缺少年份数字时应抛出对应异常（防止吞字）")
+    @DisplayName("当仅输入年号而缺少年份数字时应抛出对应异常（防止吞字，含带年字输入）")
     void shouldThrowWhenMissingYearNumber() {
         assertThatThrownBy(() -> service.parseEraString("开元"))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -103,6 +103,31 @@ class ChronologyParserTest {
         assertThatThrownBy(() -> service.parseEraString("崇祯"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("输入缺少有效的年份数字");
+
+        assertThatThrownBy(() -> service.parseEraString("开元年"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("输入缺少有效的年份数字");
+
+        assertThatThrownBy(() -> service.parseEraString("唐开元年"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("输入缺少有效的年份数字");
+
+        assertThatThrownBy(() -> service.parseEraString("明崇祯年"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("输入缺少有效的年份数字");
+    }
+
+    @Test
+    @DisplayName("以元结尾年号后接元年应正确解析")
+    void shouldParseFirstYearWithYuanEndingEra() {
+        ParsedEraQuery res = service.parseEraString("开元元年");
+        assertThat(res.eraName()).isEqualTo("开元");
+        assertThat(res.eraYear()).isEqualTo(1);
+
+        ParsedEraQuery resTang = service.parseEraString("唐开元元年");
+        assertThat(resTang.dynastyName()).isEqualTo("唐");
+        assertThat(resTang.eraName()).isEqualTo("开元");
+        assertThat(resTang.eraYear()).isEqualTo(1);
     }
 
     @Test
@@ -123,5 +148,9 @@ class ChronologyParserTest {
         assertThatThrownBy(() -> service.parseEraString("十年"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("输入缺少有效的年号名称");
+
+        assertThatThrownBy(() -> service.parseEraString("贞观0年"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("非法的年号年份");
     }
 }
