@@ -9,6 +9,60 @@ import type {
 import { parseEraYearNumber } from "./utils/chinese_number";
 import { DEFAULT_GANZHI_LIST, gregorianToGanzhi, ganzhiToGregorian } from "./utils/ganzhi";
 
+export const DYNASTY_ALIASES: Record<string, string[]> = {
+  汉: ["西汉", "东汉", "汉"],
+  西汉: ["汉", "西汉"],
+  东汉: ["汉", "东汉"],
+  晋: ["西晋", "东晋", "晋"],
+  西晋: ["晋", "西晋"],
+  东晋: ["晋", "东晋"],
+  齐: ["南齐", "北齐", "齐"],
+  南齐: ["齐", "南齐"],
+  北齐: ["齐", "北齐"],
+  秦: ["前秦", "后秦", "西秦", "秦"],
+  前秦: ["秦", "前秦"],
+  后秦: ["秦", "后秦"],
+  西秦: ["秦", "西秦"],
+  赵: ["前赵", "后赵", "赵"],
+  前赵: ["赵", "前赵"],
+  后赵: ["赵", "后赵"],
+  凉: ["前凉", "后凉", "西凉", "北凉", "南凉", "凉"],
+  前凉: ["凉", "前凉"],
+  后凉: ["凉", "后凉"],
+  西凉: ["凉", "西凉"],
+  北凉: ["凉", "北凉"],
+  南凉: ["凉", "南凉"],
+  燕: ["前燕", "后燕", "南燕", "北燕", "燕"],
+  前燕: ["燕", "前燕"],
+  后燕: ["燕", "后燕"],
+  南燕: ["燕", "南燕"],
+  北燕: ["燕", "北燕"],
+  魏: ["三国魏", "曹魏", "魏"],
+  曹魏: ["三国魏", "曹魏", "魏"],
+  三国魏: ["三国魏", "曹魏", "魏"],
+  蜀: ["三国蜀", "蜀汉", "蜀"],
+  蜀汉: ["三国蜀", "蜀汉", "蜀"],
+  三国蜀: ["三国蜀", "蜀汉", "蜀"],
+  吴: ["三国吴", "孙吴", "东吴", "吴"],
+  孙吴: ["三国吴", "孙吴", "东吴", "吴"],
+  东吴: ["三国吴", "孙吴", "东吴", "吴"],
+  三国吴: ["三国吴", "孙吴", "东吴", "吴"],
+  武周: ["周", "武周"],
+  周: ["周", "武周", "北周", "后周"]
+};
+
+function matchDynasty(target: string, eraDynasty: string, eraRawDynasty?: string): boolean {
+  if (target === eraDynasty || (eraRawDynasty && target === eraRawDynasty)) {
+    return true;
+  }
+  const aliases = DYNASTY_ALIASES[target];
+  if (aliases) {
+    if (aliases.includes(eraDynasty)) return true;
+    if (eraRawDynasty && aliases.includes(eraRawDynasty)) return true;
+  }
+  return false;
+}
+
 export class ChronologyService {
   private dynasties: Dynasty[];
   private eras: Era[];
@@ -23,7 +77,7 @@ export class ChronologyService {
     // 建立年号快速索引集合
     this.eraNamesSet = new Set(this.eras.map((e) => e.name));
 
-    // 收集所有朝代名以及原始朝代名，按长度降序排列，避免前缀歧义（如“西汉”先于“汉”）
+    // 收集所有朝代名、原始朝代名及别名，按长度降序排列
     const allDynastyNames = new Set<string>();
     for (const d of this.dynasties) {
       allDynastyNames.add(d.name);
@@ -32,13 +86,10 @@ export class ChronologyService {
       allDynastyNames.add(e.dynastyName);
       if (e.rawDynastyName) allDynastyNames.add(e.rawDynastyName);
     }
-    // 补齐常见单字朝代名
-    allDynastyNames.add("汉");
-    allDynastyNames.add("晋");
-    allDynastyNames.add("齐");
-    allDynastyNames.add("秦");
-    allDynastyNames.add("赵");
-    allDynastyNames.add("凉");
+    for (const [k, list] of Object.entries(DYNASTY_ALIASES)) {
+      allDynastyNames.add(k);
+      for (const alias of list) allDynastyNames.add(alias);
+    }
 
     this.sortedDynasties = Array.from(allDynastyNames)
       .filter(Boolean)
@@ -61,9 +112,7 @@ export class ChronologyService {
 
   getEras(dynastyName?: string): Era[] {
     if (!dynastyName) return this.eras;
-    return this.eras.filter(
-      (e) => e.dynastyName === dynastyName || e.rawDynastyName === dynastyName
-    );
+    return this.eras.filter((e) => matchDynasty(dynastyName, e.dynastyName, e.rawDynastyName));
   }
 
   getGanzhiList(): string[] {
@@ -74,16 +123,34 @@ export class ChronologyService {
 
   /**
    * 解析自然语言纪年字符串
-   * 示例：
-   * - "崇祯17年" -> { eraName: "崇祯", eraYear: 17 }
-   * - "明崇祯十七年" -> { dynastyName: "明", eraName: "崇祯", eraYear: 17 }
-   * - "顺治元年" -> { eraName: "顺治", eraYear: 1 }
-   * - "汉建元二年" -> { dynastyName: "汉", eraName: "建元", eraYear: 2 }
-   * - "西汉建元二年" -> { dynastyName: "西汉", eraName: "建元", eraYear: 2 }
    */
   parseEraString(input: string): ParsedEraQuery {
     const trimmed = input.trim();
-    const match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十]+|元)年?$/);
+    if (!trimmed) {
+      throw new Error(`无法匹配年号格式: "${input}"`);
+    }
+
+    // 若用户直接输入了纯年号或朝代+年号且无年份数字，抛出明确异常，防止将年号末尾“元”误吞为元年
+    if (this.eraNamesSet.has(trimmed)) {
+      throw new Error(`输入缺少有效的年份数字: "${input}"`);
+    }
+    for (const d of this.sortedDynasties) {
+      if (trimmed.startsWith(d.name)) {
+        const remaining = trimmed.slice(d.name.length).trim();
+        if (this.eraNamesSet.has(remaining)) {
+          throw new Error(`输入缺少有效的年份数字: "${input}"`);
+        }
+      }
+    }
+
+    // 格式切分：末尾带“年”或纯阿拉伯数字
+    let match: RegExpMatchArray | null = null;
+    if (trimmed.endsWith("年")) {
+      match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅]+|元)年$/);
+    } else {
+      match = trimmed.match(/^(.*?)(\d+)$/);
+    }
+
     if (!match) {
       throw new Error(`无法匹配年号格式: "${input}"`);
     }
@@ -96,15 +163,15 @@ export class ChronologyService {
       throw new Error(`输入缺少有效的年号名称: "${input}"`);
     }
 
-    // 情况 A: 前缀即为年号（如 "崇祯"）
+    // 情况 A: 前缀即为年号（如 "崇祯", "开元"）
     if (this.eraNamesSet.has(prefix)) {
       return { eraName: prefix, eraYear };
     }
 
-    // 情况 B: 前缀包含朝代（如 "明崇祯"、"西汉建元"、"汉建元"）
+    // 情况 B: 前缀包含朝代（如 "明崇祯"、"曹魏黄初"、"晋泰始"、"武周天授"）
     for (const d of this.sortedDynasties) {
       if (prefix.startsWith(d.name)) {
-        const remaining = prefix.slice(d.name.length);
+        const remaining = prefix.slice(d.name.length).trim();
         if (this.eraNamesSet.has(remaining)) {
           return {
             dynastyName: d.name,
@@ -208,7 +275,7 @@ export class ChronologyService {
     let candidates = this.eras.filter((e) => e.name === targetEraName);
     if (targetDynasty) {
       const td = targetDynasty;
-      candidates = candidates.filter((e) => e.dynastyName === td || e.rawDynastyName === td);
+      candidates = candidates.filter((e) => matchDynasty(td, e.dynastyName, e.rawDynastyName));
     }
 
     const results: GregorianMatchResult[] = [];
