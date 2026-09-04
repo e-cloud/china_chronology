@@ -1,7 +1,15 @@
 node_modules/
 dist/
+coverage/
 *.log
 .DS_Store
-coverage/
 __pycache__/
 .history/
+
+# Gradle & Java
+.gradle/
+build/
+bin/
+out/
+*.class
+*.jar
