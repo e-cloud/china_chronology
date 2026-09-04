@@ -1,0 +1,185 @@
+import sqlite3
+import json
+import os
+import sys
+
+DEFAULT_DB_PATH = "e:/github/cbdb_sqlite/cbdb_20260829.sqlite3"
+DEFAULT_OUTPUT_PATH = "src/data/chronology_data.json"
+
+# 繁简字符映射表（涵盖 CBDB 所有涉及的朝代、年号与干支字集）
+T2S_MAP = {
+    '漢': '汉', '晉': '晋', '齊': '齐', '趙': '赵', '涼': '凉', '禎': '祯', '順': '顺', '統': '统',
+    '開': '开', '慶': '庆', '豐': '丰', '興': '兴', '寶': '宝', '歷': '历', '應': '应', '廣': '广',
+    '義': '义', '顯': '显', '權': '权', '龍': '龙', '國': '国', '鳳': '凤', '萬': '万', '壽': '寿',
+    '聖': '圣', '榮': '荣', '華': '华', '觀': '观', '陽': '阳', '樂': '乐', '寧': '宁', '祿': '禄',
+    '遼': '辽', '陳': '陈', '吳': '吴', '後': '后', '偽': '伪', '東': '东', '西': '西', '南': '南',
+    '北': '北', '長': '长', '貞': '贞', '儀': '仪', '勝': '胜', '總': '总', '章': '章', '載': '载',
+    '歲': '岁', '會': '会', '昌': '昌', '啟': '启', '業': '业', '紹': '绍', '圖': '图', '祥': '祥',
+    '端': '端', '平': '平', '復': '复', '銘': '铭', '銀': '银', '錢': '钱', '鐵': '铁', '鍾': '钟',
+    '錦': '锦', '錫': '锡', '鏡': '镜', '銖': '铢', '鑾': '銮', '傳': '传', '優': '优', '儉': '俭',
+    '倫': '伦', '億': '亿', '儒': '儒', '兒': '儿', '兩': '两', '冊': '册', '軍': '军', '農': '农',
+    '劉': '刘', '創': '创', '劇': '剧', '辦': '办', '務': '务', '動': '动', '勢': '势', '勞': '劳',
+    '勵': '励', '勸': '劝', '區': '区', '單': '单', '博': '博', '衛': '卫', '縣': '县', '參': '参',
+    '雙': '双', '發': '发', '變': '变', '號': '号', '司': '司', '各': '各', '吉': '吉', '向': '向',
+    '君': '君', '員': '员', '和': '和', '哲': '哲', '商': '商', '問': '问', '善': '善', '嚴': '严',
+    '園': '园', '圓': '圆', '地': '地', '場': '场', '報': '报', '備': '备', '頭': '头', '太': '太',
+    '奪': '夺', '奮': '奋', '婦': '妇', '媽': '妈', '始': '始', '妥': '妥', '孫': '孙', '學': '学',
+    '安': '安', '宋': '宋', '完': '完', '宏': '宏', '實': '实', '憲': '宪', '寬': '宽', '寫': '写',
+    '審': '审', '導': '导', '將': '将', '專': '专', '尋': '寻', '對': '对', '小': '小', '少': '少',
+    '爾': '尔', '尚': '尚', '堯': '尧', '就': '就', '尺': '尺', '尼': '尼', '尾': '尾', '局': '局',
+    '居': '居', '展': '展', '屬': '属', '屠': '屠', '山': '山', '島': '岛', '嶺': '岭', '嶽': '岳',
+    '川': '川', '州': '州', '巡': '巡', '巢': '巢', '工': '工', '左': '左', '巧': '巧', '巨': '巨',
+    '巫': '巫', '差': '差', '己': '己', '已': '已', '巴': '巴', '巷': '巷', '市': '市', '布': '布',
+    '希': '希', '帑': '帑', '帖': '帖', '帛': '帛', '帝': '帝', '帥': '帅', '師': '师', '席': '席',
+    '帳': '帐', '帶': '带', '常': '常', '帽': '帽', '幀': '帧', '幄': '幄', '幅': '幅', '幣': '币',
+    '幹': '干', '年': '年', '并': '并', '幸': '幸', '麼': '么', '庄': '庄', '廬': '庐', '庫': '库',
+    '廟': '庙', '龐': '庞', '廢': '废', '廷': '廷', '建': '建', '廻': '回', '式': '式', '引': '引',
+    '弘': '弘', '弛': '弛', '弟': '弟', '張': '张', '強': '强', '彈': '弹', '彌': '弥', '彎': '弯',
+    '歸': '归', '當': '当', '錄': '录', '彙': '汇', '彝': '彝', '彥': '彦', '徵': '征', '德': '德',
+    '徹': '彻', '微': '微', '徽': '徽', '志': '志', '念': '念', '思': '思', '懇': '恳', '懲': '惩',
+    '懸': '悬', '成': '成', '我': '我', '戒': '戒', '或': '或', '戚': '戚', '戰': '战', '戲': '戏',
+    '戶': '户', '房': '房', '所': '所', '扇': '扇', '手': '手', '才': '才', '扎': '扎', '撲': '扑',
+    '打': '打', '托': '托', '揚': '扬', '承': '承', '折': '折', '撫': '抚', '護': '护', '擬': '拟',
+    '政': '政', '故': '故', '效': '效', '敕': '敕', '敏': '敏', '救': '救', '敖': '敖', '敦': '敦',
+    '敬': '敬', '數': '数', '整': '整', '文': '文', '齋': '斋', '斐': '斐', '斑': '斑', '斗': '斗',
+    '料': '料', '斛': '斛', '斜': '斜', '斟': '斟', '斡': '斡', '斤': '斤', '斥': '斥', '斧': '斧',
+    '斬': '斩', '斯': '斯', '新': '新', '方': '方', '於': '于', '施': '施', '旁': '旁', '旄': '旄',
+    '旅': '旅', '旋': '旋', '旌': '旌', '族': '族', '旗': '旗', '無': '无', '日': '日', '旦': '旦',
+    '舊': '旧', '旨': '旨', '早': '早', '旬': '旬', '旭': '旭', '旺': '旺', '旻': '旻', '昆': '昆',
+    '明': '明', '昏': '昏', '易': '易', '昔': '昔', '星': '星', '春': '春', '昧': '昧', '昨': '昨',
+    '昭': '昭', '是': '是', '昱': '昱', '昴': '昴', '晝': '昼', '晁': '晁', '晃': '晃', '晏': '晏',
+    '晌': '晌', '晟': '晟', '普': '普', '景': '景', '晰': '晰', '晴': '晴', '晶': '晶', '智': '智',
+    '曄': '晔', '曇': '昙', '曉': '晓', '曏': '向', '曖': '暧', '曠': '旷', '曦': '曦', '書': '书',
+    '曹': '曹', '曼': '曼', '曾': '曾', '替': '替', '月': '月', '有': '有', '朋': '朋', '服': '服',
+    '朔': '朔', '朕': '朕', '朗': '朗', '望': '望', '朝': '朝', '期': '期', '朦': '朦', '木': '木',
+    '未': '未', '末': '末', '本': '本', '札': '札', '術': '术', '朱': '朱', '朴': '朴', '朵': '朵',
+    '李': '李', '杏': '杏', '材': '材', '村': '村', '杖': '杖', '杞': '杞', '束': '束', '杭': '杭',
+    '杳': '杳', '杵': '杵', '松': '松', '板': '板', '極': '极', '果': '果', '枝': '枝', '樞': '枢',
+    '槍': '枪', '標': '标', '梁': '梁', '檢': '检', '武': '武', '湯': '汤', '源': '源', '濟': '济',
+    '清': '清', '溫': '温', '澤': '泽', '靈': '灵', '續': '续', '維': '维', '綱': '纲', '純': '纯',
+    '紀': '纪', '約': '约', '緯': '纬', '舉': '举', '覽': '览', '贊': '赞', '通': '通', '道': '道',
+    '遵': '遵', '達': '达', '遷': '迁', '鄭': '郑', '隨': '随'
+}
+
+def to_simp(text: str) -> str:
+    if not text:
+        return ""
+    return "".join(T2S_MAP.get(c, c) for c in text).strip()
+
+def normalize_dynasty_name(raw_dynasty: str) -> str:
+    """朝代名称规范化：西汉/东汉在通用输出中归一为'汉'，同时支持西汉/东汉输入"""
+    simp = to_simp(raw_dynasty)
+    if simp in ("西汉", "东汉"):
+        return "汉"
+    return simp
+
+def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTPUT_PATH):
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"未找到 CBDB 数据库: {db_path}")
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # 1. 提取朝代列表
+    cursor.execute("""
+        SELECT c_dy, c_dynasty_chn 
+        FROM DYNASTIES 
+        WHERE c_dynasty_chn IS NOT NULL
+        ORDER BY c_dy ASC
+    """)
+    raw_dynasties = cursor.fetchall()
+    dynasty_dict = {}
+    dynasty_names_seen = set()
+
+    for row in raw_dynasties:
+        dy_id = row[0]
+        raw_name = row[1].strip()
+        simp_name = to_simp(raw_name)
+        dynasty_dict[dy_id] = simp_name
+        if simp_name:
+            dynasty_names_seen.add(simp_name)
+
+    # 补充常见简写与聚合朝代名（如 "汉"）
+    dynasty_names_seen.add("汉")
+    dynasty_names_seen.add("晋")
+
+    dynasties = [
+        {"id": dy_id, "name": name}
+        for dy_id, name in sorted(
+            [{"id": k, "name": v} for k, v in dynasty_dict.items() if v],
+            key=lambda x: x["id"]
+        )
+    ]
+    # 保证包含通用的 "汉" 映射
+    if not any(d["name"] == "汉" for d in dynasties):
+        dynasties.append({"id": 83, "name": "汉"})
+
+    # 2. 提取年号（关联朝代名称，过滤无起止年份的记录）
+    cursor.execute("""
+        SELECT 
+            n.c_nianhao_id,
+            n.c_dy,
+            d.c_dynasty_chn,
+            n.c_nianhao_chn,
+            n.c_firstyear,
+            n.c_lastyear
+        FROM NIAN_HAO n
+        LEFT JOIN DYNASTIES d ON n.c_dy = d.c_dy
+        WHERE n.c_firstyear IS NOT NULL 
+          AND n.c_lastyear IS NOT NULL
+          AND n.c_firstyear != 0
+          AND n.c_lastyear != 0
+        ORDER BY n.c_firstyear ASC
+    """)
+    raw_eras = cursor.fetchall()
+    eras = []
+    for row in raw_eras:
+        era_id = row[0]
+        dy_id = row[1]
+        raw_dy_name = (row[2] or "").strip()
+        raw_era_name = row[3].strip()
+        start_year = row[4]
+        end_year = row[5]
+
+        # 规范化名称与简体转换
+        norm_dy_name = normalize_dynasty_name(raw_dy_name)
+        simp_era_name = to_simp(raw_era_name)
+
+        eras.append({
+            "id": era_id,
+            "dynastyId": dy_id,
+            "dynastyName": norm_dy_name,
+            "rawDynastyName": to_simp(raw_dy_name),
+            "name": simp_era_name,
+            "startYear": start_year,
+            "endYear": end_year
+        })
+
+    # 3. 提取 60 干支代码表（适配真实的 c_ganzhi_code 与过滤代码0）
+    cursor.execute("""
+        SELECT c_ganzhi_code, c_ganzhi_chn 
+        FROM GANZHI_CODES 
+        WHERE c_ganzhi_chn IS NOT NULL AND c_ganzhi_code > 0
+        ORDER BY c_ganzhi_code ASC
+    """)
+    ganzhi = [{"id": row[0], "name": row[1].strip()} for row in cursor.fetchall()]
+
+    conn.close()
+
+    result = {
+        "dynasties": dynasties,
+        "eras": eras,
+        "ganzhi": ganzhi
+    }
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+
+    print(f"数据抽取清洗完成：朝代 {len(dynasties)} 条，年号 {len(eras)} 条，干支 {len(ganzhi)} 条。")
+    print(f"产物已保存至: {output_path}")
+
+if __name__ == "__main__":
+    db_file = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("CBDB_PATH", DEFAULT_DB_PATH)
+    out_file = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_OUTPUT_PATH
+    extract_cbdb(db_file, out_file)
