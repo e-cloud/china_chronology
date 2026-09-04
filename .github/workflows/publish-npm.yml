@@ -1,0 +1,52 @@
+name: Publish TypeScript to NPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'NPM 分发标签 (例如: latest, beta, next)'
+        required: true
+        default: 'latest'
+        type: string
+
+jobs:
+  publish:
+    name: Publish to NPM Registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # 用于生成 NPM 官方 Provenance 来源可验证签名
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: 配置 Node.js 与缓存
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: ts/pnpm-lock.yaml
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+        working-directory: ts
+
+      - name: 执行测试与代码检查
+        run: pnpm lint && pnpm test
+        working-directory: ts
+
+      - name: 构建产物
+        run: pnpm build
+        working-directory: ts
+
+      - name: 发布至 NPM
+        run: pnpm publish --no-git-checks --tag ${{ inputs.tag }}
+        working-directory: ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

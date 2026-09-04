@@ -1,0 +1,58 @@
+name: Publish Java to Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: '发布目标类型 (release: 正式版到 Central Portal, snapshot: 快照版)'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - snapshot
+
+jobs:
+  publish:
+    name: Publish to Sonatype Central Portal
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 配置 Gradle 环境与缓存
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 赋予 gradlew 执行权限
+        run: chmod +x gradlew
+        working-directory: java
+
+      - name: 执行测试与代码检查
+        run: ./gradlew check
+        working-directory: java
+
+      - name: 发布正式版到 Central Portal
+        if: ${{ inputs.release_type == 'release' }}
+        run: ./gradlew nmcpPublishAggregationToCentralPortal
+        working-directory: java
+        env:
+          SONATYPE_CENTRAL_USERNAME: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+          SONATYPE_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+
+      - name: 发布快照版到 Central Snapshots
+        if: ${{ inputs.release_type == 'snapshot' }}
+        run: ./gradlew nmcpPublishAggregationToCentralPortalSnapshots
+        working-directory: java
+        env:
+          SONATYPE_CENTRAL_USERNAME: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+          SONATYPE_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}

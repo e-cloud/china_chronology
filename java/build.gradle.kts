@@ -3,7 +3,14 @@ plugins {
     `maven-publish`
     signing
     jacoco
+    checkstyle
+    id("com.gradleup.nmcp") version "1.6.2"
+    id("com.gradleup.nmcp.aggregation") version "1.6.2"
+    id("com.diffplug.spotless") version "6.25.0"
 }
+
+
+
 
 group = "io.github.e-cloud"
 version = "0.1.0"
@@ -27,7 +34,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("org.assertj:assertj-core:3.27.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    nmcpAggregation(project)
 }
+
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
@@ -65,6 +75,31 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
+spotless {
+    java {
+        target("src/**/*.java")
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = "10.21.4"
+    configFile = file("${project.projectDir}/config/checkstyle/checkstyle.xml")
+    isIgnoreFailures = false
+    maxWarnings = 0
+}
+
+tasks.withType<Checkstyle> {
+    reports {
+        xml.required.set(false)
+        html.required.set(true)
+    }
+}
+
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
@@ -99,25 +134,37 @@ publishing {
         }
     }
 
-    repositories {
-        maven {
-            name = "OSSRH"
-            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            credentials {
-                username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-                password = project.findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
-            }
-        }
+}
+
+nmcpAggregation {
+    centralPortal {
+        username.set(
+            project.findProperty("centralUsername") as? String
+                ?: project.findProperty("mavenCentralUsername") as? String
+                ?: System.getenv("CENTRAL_USERNAME")
+                ?: System.getenv("SONATYPE_CENTRAL_USERNAME")
+        )
+        password.set(
+            project.findProperty("centralPassword") as? String
+                ?: project.findProperty("mavenCentralPassword") as? String
+                ?: System.getenv("CENTRAL_PASSWORD")
+                ?: System.getenv("SONATYPE_CENTRAL_PASSWORD")
+        )
+        publishingType.set("AUTOMATIC")
     }
 }
 
 signing {
-    val signingKey = project.findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
-    val signingPassword = project.findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
+    val signingKey = project.findProperty("signingKey") as? String
+        ?: System.getenv("SIGNING_KEY")
+        ?: System.getenv("GPG_SIGNING_KEY")
+    val signingPassword = project.findProperty("signingPassword") as? String
+        ?: System.getenv("SIGNING_PASSWORD")
+        ?: System.getenv("GPG_SIGNING_PASSWORD")
+
     if (!signingKey.isNullOrEmpty()) {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign(publishing.publications["mavenJava"])
     }
 }
+
