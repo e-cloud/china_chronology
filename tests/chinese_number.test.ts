@@ -44,5 +44,7 @@ describe("parseEraYearNumber", () => {
   it("非法输入应抛出错误", () => {
     expect(() => parseEraYearNumber("abc")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("百十八")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("十百")).toThrow("无法识别年份数字");
   });
 });

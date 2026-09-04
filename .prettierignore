@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+.history
+src/data/chronology_data.json
+pnpm-lock.yaml

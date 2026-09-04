@@ -7,11 +7,7 @@ import type {
   GregorianMatchResult
 } from "./types";
 import { parseEraYearNumber } from "./utils/chinese_number";
-import {
-  DEFAULT_GANZHI_LIST,
-  gregorianToGanzhi,
-  ganzhiToGregorian
-} from "./utils/ganzhi";
+import { DEFAULT_GANZHI_LIST, gregorianToGanzhi, ganzhiToGregorian } from "./utils/ganzhi";
 
 export class ChronologyService {
   private dynasties: Dynasty[];
@@ -30,10 +26,10 @@ export class ChronologyService {
     // 收集所有朝代名以及原始朝代名，按长度降序排列，避免前缀歧义（如“西汉”先于“汉”）
     const allDynastyNames = new Set<string>();
     for (const d of this.dynasties) {
-      if (d.name) allDynastyNames.add(d.name);
+      allDynastyNames.add(d.name);
     }
     for (const e of this.eras) {
-      if (e.dynastyName) allDynastyNames.add(e.dynastyName);
+      allDynastyNames.add(e.dynastyName);
       if (e.rawDynastyName) allDynastyNames.add(e.rawDynastyName);
     }
     // 补齐常见单字朝代名
@@ -66,10 +62,7 @@ export class ChronologyService {
   getEras(dynastyName?: string): Era[] {
     if (!dynastyName) return this.eras;
     return this.eras.filter(
-      (e) =>
-        e.dynastyName === dynastyName ||
-        e.rawDynastyName === dynastyName ||
-        (dynastyName === "汉" && (e.dynastyName === "西汉" || e.dynastyName === "东汉"))
+      (e) => e.dynastyName === dynastyName || e.rawDynastyName === dynastyName
     );
   }
 
@@ -191,11 +184,7 @@ export class ChronologyService {
     eraYear: number | string,
     dynastyName?: string
   ): GregorianMatchResult[];
-  eraToGregorian(
-    arg1: string,
-    arg2?: number | string,
-    arg3?: string
-  ): GregorianMatchResult[] {
+  eraToGregorian(arg1: string, arg2?: number | string, arg3?: string): GregorianMatchResult[] {
     let targetEraName: string;
     let targetEraYear: number;
     let targetDynasty: string | undefined;
@@ -219,13 +208,7 @@ export class ChronologyService {
     let candidates = this.eras.filter((e) => e.name === targetEraName);
     if (targetDynasty) {
       const td = targetDynasty;
-      candidates = candidates.filter(
-        (e) =>
-          e.dynastyName === td ||
-          e.rawDynastyName === td ||
-          (td === "汉" && (e.dynastyName === "西汉" || e.dynastyName === "东汉")) ||
-          ((td === "西汉" || td === "东汉") && e.dynastyName === "汉")
-      );
+      candidates = candidates.filter((e) => e.dynastyName === td || e.rawDynastyName === td);
     }
 
     const results: GregorianMatchResult[] = [];

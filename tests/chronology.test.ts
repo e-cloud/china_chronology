@@ -34,7 +34,7 @@ describe("ChronologyService 核心互转与消歧", () => {
       // 未指定朝代：建元2年
       const allJianyuan = service.eraToGregorian("建元2年");
       expect(allJianyuan.length).toBeGreaterThanOrEqual(4);
-      
+
       const hanMatch = allJianyuan.find((m) => m.dynastyName === "汉");
       expect(hanMatch).toEqual({
         gregorianYear: -139,
@@ -118,10 +118,112 @@ describe("ChronologyService 核心互转与消歧", () => {
     });
   });
 
-  describe("干支跨度检索 (ganzhiToGregorian)", () => {
-    it("1600-1650 年间的甲申年检索", () => {
-      const res = service.ganzhiToGregorian("甲申", 1600, 1650);
-      expect(res).toEqual([1644]);
+  describe("基础查询接口与构造选项覆盖", () => {
+    it("getDynasties 应返回朝代列表", () => {
+      const dynasties = service.getDynasties();
+      expect(dynasties.length).toBeGreaterThan(0);
+    });
+
+    it("getEras 应支持全部与按朝代过滤", () => {
+      const allEras = service.getEras();
+      expect(allEras.length).toBeGreaterThan(0);
+
+      const mingEras = service.getEras("明");
+      expect(mingEras.every((e) => e.dynastyName === "明")).toBe(true);
+
+      const hanEras = service.getEras("汉");
+      expect(hanEras.length).toBeGreaterThan(0);
+
+      const rawXiHanEras = service.getEras("西汉");
+      expect(rawXiHanEras.length).toBeGreaterThan(0);
+    });
+
+    it("getGanzhiList 应返回 60 干支", () => {
+      const list = service.getGanzhiList();
+      expect(list).toHaveLength(60);
+    });
+
+    it("构造函数在未传入有效 ganzhi 时应自动回退到默认 60 干支", () => {
+      const fallbackService = new ChronologyService({
+        dynasties: [{ id: 1, name: "明" }],
+        eras: [
+          { id: 1, dynastyId: 1, dynastyName: "明", name: "洪武", startYear: 1368, endYear: 1398 }
+        ],
+        ganzhi: []
+      });
+      expect(fallbackService.getGanzhiList()).toHaveLength(60);
+    });
+  });
+
+  describe("异常分支与特殊边界覆盖", () => {
+    it("parseEraString 兜底匹配未知年号与朝代匹配但年号未知情况", () => {
+      const parsed1 = service.parseEraString("未知年号3年");
+      expect(parsed1).toEqual({
+        eraName: "未知年号",
+        eraYear: 3
+      });
+
+      // 朝代匹配成功，但后续不是已知年号
+      const parsed2 = service.parseEraString("明未命名年号5年");
+      expect(parsed2).toEqual({
+        eraName: "明未命名年号",
+        eraYear: 5
+      });
+    });
+
+    it("eraToGregorian 支持字符串年份与参数校验", () => {
+      // 传中文数字字符串作为年份
+      const resStr = service.eraToGregorian("建元", "二", "汉");
+      expect(resStr).toEqual([
+        { gregorianYear: -139, dynastyName: "汉", eraName: "建元", eraYear: 2, ganzhi: "壬寅" }
+      ]);
+
+      expect(() => service.eraToGregorian("崇祯", 0)).toThrow("非法的年号年份");
+      expect(() => service.eraToGregorian("崇祯", -1)).toThrow("非法的年号年份");
+      expect(() => service.eraToGregorian("崇祯", NaN)).toThrow("非法的年号年份");
+    });
+
+    it("跨越公元前后无 0 年的年号双向互转修正", () => {
+      // 创建跨越公元前后的虚拟年号：-2 到 3（对应公元前2, 前1, 公元1, 2, 3年，共5年）
+      const crossService = new ChronologyService({
+        dynasties: [{ id: 1, name: "虚拟朝代" }],
+        eras: [
+          {
+            id: 1,
+            dynastyId: 1,
+            dynastyName: "虚拟朝代",
+            name: "跨元",
+            startYear: -2,
+            endYear: 3
+          }
+        ],
+        ganzhi: defaultDataset.ganzhi
+      });
+
+      // 公历公元 2 年：跨越公元前无0年，元年(-2), 二年(-1), 三年(1), 四年(2)
+      const eraRes = crossService.gregorianToEra(2);
+      expect(eraRes).toEqual([
+        {
+          dynastyName: "虚拟朝代",
+          eraName: "跨元",
+          eraYear: 4,
+          eraYearDisplay: "跨元4年",
+          gregorianYear: 2,
+          ganzhi: "壬戌"
+        }
+      ]);
+
+      // 年号转公历：跨元4年 -> 公元 2 年
+      const gregRes = crossService.eraToGregorian("跨元4年");
+      expect(gregRes).toEqual([
+        {
+          dynastyName: "虚拟朝代",
+          eraName: "跨元",
+          eraYear: 4,
+          ganzhi: "壬戌",
+          gregorianYear: 2
+        }
+      ]);
     });
   });
 });

@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  DEFAULT_GANZHI_LIST,
-  gregorianToGanzhi,
-  ganzhiToGregorian
-} from "../src/utils/ganzhi";
+import { DEFAULT_GANZHI_LIST, gregorianToGanzhi, ganzhiToGregorian } from "../src/utils/ganzhi";
 
 describe("ganzhi utils", () => {
   it("DEFAULT_GANZHI_LIST 长度应为 60 且以甲子开头、癸亥结尾", () => {
@@ -44,6 +40,9 @@ describe("ganzhi utils", () => {
       expect(ganzhiToGregorian("甲申", 1600, 1650)).toEqual([1644]);
       // 1900-2000 年间的甲子年
       expect(ganzhiToGregorian("甲子", 1900, 2000)).toEqual([1924, 1984]);
+      // 跨公元前后区间（-2 到 2，测试过滤 0 年逻辑）
+      const res = ganzhiToGregorian("庚申", -2, 2);
+      expect(res).toEqual([-1]);
     });
   });
 });
