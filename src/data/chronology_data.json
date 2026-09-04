@@ -1,348 +1,344 @@
 {
   "dynasties": [
     {
-      "id": "id",
-      "name": "name"
+      "id": 0,
+      "name": "未详"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 1,
+      "name": "汉前"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 2,
+      "name": "秦汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 3,
+      "name": "三国"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 4,
+      "name": "南北朝"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 5,
+      "name": "隋"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 6,
+      "name": "唐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 7,
+      "name": "五代"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 8,
+      "name": "后蜀"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 9,
+      "name": "吴"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 10,
+      "name": "南唐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 11,
+      "name": "吴越"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 12,
+      "name": "闽国"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 13,
+      "name": "南汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 14,
+      "name": "高丽"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 15,
+      "name": "宋"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 16,
+      "name": "辽"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 17,
+      "name": "金"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 18,
+      "name": "元"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 19,
+      "name": "明"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 20,
+      "name": "清"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 21,
+      "name": "中华民国"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 22,
+      "name": "中华人民共和国"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 23,
+      "name": "西晋"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 24,
+      "name": "陈"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 25,
+      "name": "东汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 26,
+      "name": "三国魏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 27,
+      "name": "东晋"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 28,
+      "name": "宋(刘)"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 29,
+      "name": "西汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 30,
+      "name": "北魏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 31,
+      "name": "北周"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 32,
+      "name": "南齐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 34,
+      "name": "后梁"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 35,
+      "name": "北齐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 36,
+      "name": "吴(杨)"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 37,
+      "name": "西梁"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 38,
+      "name": "楚(马)"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 39,
+      "name": "前燕"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 40,
+      "name": "西魏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 41,
+      "name": "东魏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 42,
+      "name": "三国吴"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 44,
+      "name": "南梁"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 45,
+      "name": "后秦"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 46,
+      "name": "新"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 47,
+      "name": "后唐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 48,
+      "name": "后晋"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 49,
+      "name": "后周"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 50,
+      "name": "南燕"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 51,
+      "name": "前凉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 52,
+      "name": "后汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 53,
+      "name": "三国蜀"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 55,
+      "name": "南平"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 56,
+      "name": "西凉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 57,
+      "name": "伪齐"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 58,
+      "name": "韩国"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 59,
+      "name": "西辽"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 60,
+      "name": "北燕"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 61,
+      "name": "赢秦"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 62,
+      "name": "北凉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 63,
+      "name": "后燕"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 64,
+      "name": "后赵"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 65,
+      "name": "前秦"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 66,
+      "name": "北汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 67,
+      "name": "新罗"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 68,
+      "name": "东梁"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 69,
+      "name": "前赵"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 70,
+      "name": "成汉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 71,
+      "name": "夏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 72,
+      "name": "西秦"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 73,
+      "name": "后凉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 74,
+      "name": "南凉"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 75,
+      "name": "前蜀"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 76,
+      "name": "西燕"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 77,
+      "name": "周"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 78,
+      "name": "西夏"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 79,
+      "name": "北元"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 80,
+      "name": "南明"
     },
     {
-      "id": "id",
-      "name": "name"
+      "id": 81,
+      "name": "郑（王世充）"
     },
     {
-      "id": "id",
-      "name": "name"
-    },
-    {
-      "id": "id",
-      "name": "name"
-    },
-    {
-      "id": "id",
-      "name": "name"
-    },
-    {
-      "id": "id",
-      "name": "name"
-    },
-    {
-      "id": "id",
-      "name": "name"
-    },
-    {
-      "id": "id",
-      "name": "name"
+      "id": 82,
+      "name": "晋"
     },
     {
       "id": 83,
       "name": "汉"
+    },
+    {
+      "id": 84,
+      "name": "朝鲜"
+    },
+    {
+      "id": 85,
+      "name": "大顺"
+    },
+    {
+      "id": 86,
+      "name": "大西"
+    },
+    {
+      "id": 87,
+      "name": "代"
     }
   ],
   "eras": [
@@ -486,7 +482,7 @@
       "dynastyId": 29,
       "dynastyName": "汉",
       "rawDynastyName": "西汉",
-      "name": "地節",
+      "name": "地节",
       "startYear": -69,
       "endYear": -66
     },
@@ -531,7 +527,7 @@
       "dynastyId": 29,
       "dynastyName": "汉",
       "rawDynastyName": "西汉",
-      "name": "黃龙",
+      "name": "黄龙",
       "startYear": -49,
       "endYear": -49
     },
@@ -603,7 +599,7 @@
       "dynastyId": 29,
       "dynastyName": "汉",
       "rawDynastyName": "西汉",
-      "name": "鴻嘉",
+      "name": "鸿嘉",
       "startYear": -20,
       "endYear": -17
     },
@@ -630,7 +626,7 @@
       "dynastyId": 29,
       "dynastyName": "汉",
       "rawDynastyName": "西汉",
-      "name": "綏和",
+      "name": "绥和",
       "startYear": -8,
       "endYear": -7
     },
@@ -666,7 +662,7 @@
       "dynastyId": 29,
       "dynastyName": "汉",
       "rawDynastyName": "西汉",
-      "name": "居攝",
+      "name": "居摄",
       "startYear": 6,
       "endYear": 8
     },
@@ -1080,7 +1076,7 @@
       "dynastyId": 26,
       "dynastyName": "三国魏",
       "rawDynastyName": "三国魏",
-      "name": "黃初",
+      "name": "黄初",
       "startYear": 220,
       "endYear": 226
     },
@@ -1098,7 +1094,7 @@
       "dynastyId": 42,
       "dynastyName": "三国吴",
       "rawDynastyName": "三国吴",
-      "name": "黃武",
+      "name": "黄武",
       "startYear": 222,
       "endYear": 229
     },
@@ -1125,7 +1121,7 @@
       "dynastyId": 42,
       "dynastyName": "三国吴",
       "rawDynastyName": "三国吴",
-      "name": "黃龙",
+      "name": "黄龙",
       "startYear": 229,
       "endYear": 231
     },
@@ -1170,7 +1166,7 @@
       "dynastyId": 42,
       "dynastyName": "三国吴",
       "rawDynastyName": "三国吴",
-      "name": "赤烏",
+      "name": "赤乌",
       "startYear": 238,
       "endYear": 251
     },
@@ -1377,7 +1373,7 @@
       "dynastyId": 42,
       "dynastyName": "三国吴",
       "rawDynastyName": "三国吴",
-      "name": "天璽",
+      "name": "天玺",
       "startYear": 276,
       "endYear": 276
     },
@@ -1854,7 +1850,7 @@
       "dynastyId": 39,
       "dynastyName": "前燕",
       "rawDynastyName": "前燕",
-      "name": "元璽",
+      "name": "元玺",
       "startYear": 352,
       "endYear": 356
     },
@@ -2205,7 +2201,7 @@
       "dynastyId": 62,
       "dynastyName": "北凉",
       "rawDynastyName": "北凉",
-      "name": "神璽",
+      "name": "神玺",
       "startYear": 397,
       "endYear": 398
     },
@@ -2268,7 +2264,7 @@
       "dynastyId": 62,
       "dynastyName": "北凉",
       "rawDynastyName": "北凉",
-      "name": "天璽",
+      "name": "天玺",
       "startYear": 399,
       "endYear": 400
     },
@@ -2340,7 +2336,7 @@
       "dynastyId": 30,
       "dynastyName": "北魏",
       "rawDynastyName": "北魏",
-      "name": "天賜",
+      "name": "天赐",
       "startYear": 404,
       "endYear": 408
     },
@@ -2403,7 +2399,7 @@
       "dynastyId": 71,
       "dynastyName": "夏",
       "rawDynastyName": "夏",
-      "name": "龙昇",
+      "name": "龙升",
       "startYear": 407,
       "endYear": 412
     },
@@ -2826,7 +2822,7 @@
       "dynastyId": 28,
       "dynastyName": "宋(刘)",
       "rawDynastyName": "宋(刘)",
-      "name": "昇明",
+      "name": "升明",
       "startYear": 477,
       "endYear": 479
     },
@@ -2925,7 +2921,7 @@
       "dynastyId": 44,
       "dynastyName": "南梁",
       "rawDynastyName": "南梁",
-      "name": "天監",
+      "name": "天监",
       "startYear": 502,
       "endYear": 519
     },
@@ -2970,7 +2966,7 @@
       "dynastyId": 30,
       "dynastyName": "北魏",
       "rawDynastyName": "北魏",
-      "name": "神龜",
+      "name": "神龟",
       "startYear": 518,
       "endYear": 520
     },
@@ -3609,7 +3605,7 @@
       "dynastyId": 6,
       "dynastyName": "唐",
       "rawDynastyName": "唐",
-      "name": "調露",
+      "name": "调露",
       "startYear": 679,
       "endYear": 680
     },
@@ -3744,7 +3740,7 @@
       "dynastyId": 77,
       "dynastyName": "周",
       "rawDynastyName": "周",
-      "name": "證圣",
+      "name": "证圣",
       "startYear": 695,
       "endYear": 695
     },
@@ -3789,7 +3785,7 @@
       "dynastyId": 77,
       "dynastyName": "周",
       "rawDynastyName": "周",
-      "name": "圣曆",
+      "name": "圣历",
       "startYear": 698,
       "endYear": 700
     },
@@ -3798,7 +3794,7 @@
       "dynastyId": 77,
       "dynastyName": "周",
       "rawDynastyName": "周",
-      "name": "久視",
+      "name": "久视",
       "startYear": 700,
       "endYear": 700
     },
@@ -3852,7 +3848,7 @@
       "dynastyId": 6,
       "dynastyName": "唐",
       "rawDynastyName": "唐",
-      "name": "景雲",
+      "name": "景云",
       "startYear": 710,
       "endYear": 711
     },
@@ -3960,7 +3956,7 @@
       "dynastyId": 6,
       "dynastyName": "唐",
       "rawDynastyName": "唐",
-      "name": "大曆",
+      "name": "大历",
       "startYear": 766,
       "endYear": 779
     },
@@ -4023,7 +4019,7 @@
       "dynastyId": 6,
       "dynastyName": "唐",
       "rawDynastyName": "唐",
-      "name": "宝曆",
+      "name": "宝历",
       "startYear": 825,
       "endYear": 827
     },
@@ -4300,8 +4296,8 @@
     {
       "id": 442,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "武义",
       "startYear": 919,
       "endYear": 920
@@ -4327,8 +4323,8 @@
     {
       "id": 443,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "顺义",
       "startYear": 921,
       "endYear": 926
@@ -4435,8 +4431,8 @@
     {
       "id": 444,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "乾贞",
       "startYear": 927,
       "endYear": 927
@@ -4444,8 +4440,8 @@
     {
       "id": 445,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "乾正",
       "startYear": 927,
       "endYear": 928
@@ -4462,8 +4458,8 @@
     {
       "id": 446,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "太和",
       "startYear": 929,
       "endYear": 934
@@ -4480,8 +4476,8 @@
     {
       "id": 465,
       "dynastyId": 12,
-      "dynastyName": "閩国",
-      "rawDynastyName": "閩国",
+      "dynastyName": "闽国",
+      "rawDynastyName": "闽国",
       "name": "龙启",
       "startYear": 933,
       "endYear": 934
@@ -4516,8 +4512,8 @@
     {
       "id": 447,
       "dynastyId": 36,
-      "dynastyName": "吴(楊)",
-      "rawDynastyName": "吴(楊)",
+      "dynastyName": "吴(杨)",
+      "rawDynastyName": "吴(杨)",
       "name": "天祚",
       "startYear": 935,
       "endYear": 937
@@ -4525,8 +4521,8 @@
     {
       "id": 466,
       "dynastyId": 12,
-      "dynastyName": "閩国",
-      "rawDynastyName": "閩国",
+      "dynastyName": "闽国",
+      "rawDynastyName": "闽国",
       "name": "永和",
       "startYear": 935,
       "endYear": 936
@@ -4543,8 +4539,8 @@
     {
       "id": 467,
       "dynastyId": 12,
-      "dynastyName": "閩国",
-      "rawDynastyName": "閩国",
+      "dynastyName": "闽国",
+      "rawDynastyName": "闽国",
       "name": "通文",
       "startYear": 936,
       "endYear": 938
@@ -4554,7 +4550,7 @@
       "dynastyId": 10,
       "dynastyName": "南唐",
       "rawDynastyName": "南唐",
-      "name": "昇元",
+      "name": "升元",
       "startYear": 937,
       "endYear": 942
     },
@@ -4579,8 +4575,8 @@
     {
       "id": 468,
       "dynastyId": 12,
-      "dynastyName": "閩国",
-      "rawDynastyName": "閩国",
+      "dynastyName": "闽国",
+      "rawDynastyName": "闽国",
       "name": "永隆",
       "startYear": 939,
       "endYear": 942
@@ -4597,8 +4593,8 @@
     {
       "id": 469,
       "dynastyId": 12,
-      "dynastyName": "閩国",
-      "rawDynastyName": "閩国",
+      "dynastyName": "闽国",
+      "rawDynastyName": "闽国",
       "name": "天德",
       "startYear": 943,
       "endYear": 945
@@ -4689,7 +4685,7 @@
       "dynastyId": 16,
       "dynastyName": "辽",
       "rawDynastyName": "辽",
-      "name": "应曆",
+      "name": "应历",
       "startYear": 951,
       "endYear": 969
     },
@@ -5004,7 +5000,7 @@
       "dynastyId": 78,
       "dynastyName": "西夏",
       "rawDynastyName": "西夏",
-      "name": "天授禮法延祚",
+      "name": "天授礼法延祚",
       "startYear": 1038,
       "endYear": 1048
     },
@@ -5022,7 +5018,7 @@
       "dynastyId": 15,
       "dynastyName": "宋",
       "rawDynastyName": "宋",
-      "name": "庆曆",
+      "name": "庆历",
       "startYear": 1041,
       "endYear": 1048
     },
@@ -5148,7 +5144,7 @@
       "dynastyId": 78,
       "dynastyName": "西夏",
       "rawDynastyName": "西夏",
-      "name": "天賜禮盛国庆",
+      "name": "天赐礼盛国庆",
       "startYear": 1071,
       "endYear": 1075
     },
@@ -5202,7 +5198,7 @@
       "dynastyId": 78,
       "dynastyName": "西夏",
       "rawDynastyName": "西夏",
-      "name": "天安禮定",
+      "name": "天安礼定",
       "startYear": 1086,
       "endYear": 1086
     },
@@ -5346,7 +5342,7 @@
       "dynastyId": 17,
       "dynastyName": "金",
       "rawDynastyName": "金",
-      "name": "天輔",
+      "name": "天辅",
       "startYear": 1117,
       "endYear": 1122
     },
@@ -5895,7 +5891,7 @@
       "dynastyId": 18,
       "dynastyName": "元",
       "rawDynastyName": "元",
-      "name": "乃馬真后",
+      "name": "乃马真后",
       "startYear": 1242,
       "endYear": 1245
     },
@@ -6084,7 +6080,7 @@
       "dynastyId": 18,
       "dynastyName": "元",
       "rawDynastyName": "元",
-      "name": "天曆",
+      "name": "天历",
       "startYear": 1328,
       "endYear": 1330
     },
@@ -6264,7 +6260,7 @@
       "dynastyId": 19,
       "dynastyName": "明",
       "rawDynastyName": "明",
-      "name": "万曆",
+      "name": "万历",
       "startYear": 1573,
       "endYear": 1620
     },
@@ -6300,7 +6296,7 @@
       "dynastyId": 20,
       "dynastyName": "清",
       "rawDynastyName": "清",
-      "name": "天聰",
+      "name": "天聪",
       "startYear": 1627,
       "endYear": 1635
     },
@@ -6381,7 +6377,7 @@
       "dynastyId": 80,
       "dynastyName": "南明",
       "rawDynastyName": "南明",
-      "name": "永曆",
+      "name": "永历",
       "startYear": 1647,
       "endYear": 1661
     },
@@ -6453,7 +6449,7 @@
       "dynastyId": 20,
       "dynastyName": "清",
       "rawDynastyName": "清",
-      "name": "光緒",
+      "name": "光绪",
       "startYear": 1875,
       "endYear": 1908
     },

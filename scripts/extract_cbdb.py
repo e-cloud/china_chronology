@@ -58,7 +58,12 @@ T2S_MAP = {
     '槍': '枪', '標': '标', '梁': '梁', '檢': '检', '武': '武', '湯': '汤', '源': '源', '濟': '济',
     '清': '清', '溫': '温', '澤': '泽', '靈': '灵', '續': '续', '維': '维', '綱': '纲', '純': '纯',
     '紀': '纪', '約': '约', '緯': '纬', '舉': '举', '覽': '览', '贊': '赞', '通': '通', '道': '道',
-    '遵': '遵', '達': '达', '遷': '迁', '鄭': '郑', '隨': '随'
+    '遵': '遵', '達': '达', '遷': '迁', '鄭': '郑', '隨': '随',
+    '黃': '黄', '節': '节', '鴻': '鸿', '綏': '绥', '攝': '摄', '禮': '礼',
+    '曆': '历', '昇': '升', '楊': '杨', '烏': '乌', '璽': '玺', '監': '监',
+    '緒': '绪', '羅': '罗', '聰': '聪', '視': '视', '詳': '详', '調': '调',
+    '證': '证', '賜': '赐', '贏': '赢', '輔': '辅', '閩': '闽', '雲': '云',
+    '韓': '韩', '馬': '马', '鮮': '鲜', '麗': '丽', '龜': '龟'
 }
 
 def to_simp(text: str) -> str:
@@ -89,28 +94,20 @@ def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTP
     """)
     raw_dynasties = cursor.fetchall()
     dynasty_dict = {}
-    dynasty_names_seen = set()
 
     for row in raw_dynasties:
         dy_id = row[0]
         raw_name = row[1].strip()
         simp_name = to_simp(raw_name)
-        dynasty_dict[dy_id] = simp_name
         if simp_name:
-            dynasty_names_seen.add(simp_name)
+            dynasty_dict[dy_id] = simp_name
 
-    # 补充常见简写与聚合朝代名（如 "汉"）
-    dynasty_names_seen.add("汉")
-    dynasty_names_seen.add("晋")
-
+    # 构造真实朝代列表，修复字典推导式解包 bug
     dynasties = [
-        {"id": dy_id, "name": name}
-        for dy_id, name in sorted(
-            [{"id": k, "name": v} for k, v in dynasty_dict.items() if v],
-            key=lambda x: x["id"]
-        )
+        {"id": k, "name": v}
+        for k, v in sorted(dynasty_dict.items(), key=lambda x: x[0])
     ]
-    # 保证包含通用的 "汉" 映射
+    # 保证包含通用的 "汉" 映射 (id: 83)
     if not any(d["name"] == "汉" for d in dynasties):
         dynasties.append({"id": 83, "name": "汉"})
 
