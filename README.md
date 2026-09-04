@@ -51,14 +51,33 @@ chronology.gregorianToEra(1644);
 //   { dynastyName: '清', eraName: '顺治', eraYear: 1, eraYearDisplay: '顺治元年', gregorianYear: 1644, ganzhi: '甲申' }
 // ]
 
-// 4. 干支跨度检索
+// 4. 三国与武周等复杂政权消歧
+chronology.eraToGregorian("曹魏黄初元年");
+// => [ { gregorianYear: 220, dynastyName: '三国魏', eraName: '黄初', eraYear: 1, ganzhi: '庚子' } ]
+
+chronology.eraToGregorian("晋泰始元年"); // 全称单字自动关联西晋/东晋
+// => [ { gregorianYear: 265, dynastyName: '西晋', eraName: '泰始', eraYear: 1, ganzhi: '乙酉' } ]
+
+chronology.eraToGregorian("武周天授元年");
+// => [ { gregorianYear: 690, dynastyName: '周', eraName: '天授', eraYear: 1, ganzhi: '庚寅' } ]
+
+// 5. 古典文献数字解析（廿/卅）
+chronology.eraToGregorian("乾隆廿五年"); // 自动解析为 25 年
+// => [ { gregorianYear: 1760, dynastyName: '清', eraName: '乾隆', eraYear: 25, ganzhi: '庚辰' } ]
+
+// 6. 干支跨度检索
 chronology.ganzhiToGregorian("甲申", 1600, 1650);
 // => [ 1644 ]
 
-// 5. 单独使用干支换算
+// 7. 单独使用干支换算
 gregorianToGanzhi(1644); // "甲申"
 gregorianToGanzhi(2024); // "甲辰"
 ```
+
+## 历法与精度说明
+
+- **公历整年粒度**：本库基于中国历史学公认的标准宏观公历整年换算。中国夏历岁首（正月初一）通常落在公历 1 月 21 日至 2 月 20 日之间，故公历 1 月份在严格农历日历上往往属于前一年末（如公历 1644 年 1 月实为明崇祯十六年癸未年十二月），在微观特定日期考证时需注意此自然岁首漂移。
+- **一岁多号与并立改元**：历史上同一年存在多次改元或不同政权并存（如 1644 年明崇祯十七年与清顺治元年；公元 684 年多次改元），本库 `gregorianToEra` 将返回该公历年所有有效年号列表。
 
 ## 自定义数据集
 

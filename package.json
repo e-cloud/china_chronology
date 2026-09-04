@@ -18,6 +18,7 @@
       "require": "./dist/data/index.cjs"
     }
   },
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md",
@@ -45,8 +46,16 @@
     "gregorian",
     "chinese-history"
   ],
-  "author": "group-e-cloud",
+  "author": "e-cloud",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/e-cloud/china_chronology.git"
+  },
+  "bugs": {
+    "url": "https://github.com/e-cloud/china_chronology/issues"
+  },
+  "homepage": "https://github.com/e-cloud/china_chronology#readme",
   "devDependencies": {
     "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
