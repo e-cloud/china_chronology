@@ -6,8 +6,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        "data/index": resolve(__dirname, "src/data/index.ts")
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        "data/index": resolve(import.meta.dirname, "src/data/index.ts")
       },
       formats: ["es", "cjs"],
       fileName: (format, entryName) => `${entryName}.${format === "es" ? "js" : "cjs"}`
