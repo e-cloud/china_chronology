@@ -10,6 +10,8 @@ import io.github.ecloud.chronology.model.EraMatchResult;
 import io.github.ecloud.chronology.model.GregorianMatchResult;
 import io.github.ecloud.chronology.model.ParsedEraQuery;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -368,5 +370,122 @@ class ChronologyServiceTest {
         // eraToGregorian(String, String) 两参数字符串年份重载
         List<GregorianMatchResult> resStrTwoArg = service.eraToGregorian("崇祯", "十七");
         assertThat(resStrTwoArg).containsExactly(new GregorianMatchResult(1644, "明", "崇祯", 17, "甲申"));
+    }
+
+    @Test
+    @DisplayName("弘光年号应准确对应1645年（不存在弘光二年）")
+    void shouldHandleHongguangEraAccurately() {
+        List<GregorianMatchResult> res1 = service.eraToGregorian("弘光元年");
+        assertThat(res1).containsExactly(new GregorianMatchResult(1645, "南明", "弘光", 1, "乙酉"));
+
+        List<GregorianMatchResult> res2 = service.eraToGregorian("弘光二年");
+        assertThat(res2).isEmpty();
+
+        List<EraMatchResult> res1644 = service.gregorianToEra(1644);
+        assertThat(res1644).noneMatch(e -> "弘光".equals(e.eraName()));
+
+        List<EraMatchResult> res1645 = service.gregorianToEra(1645);
+        assertThat(res1645).anyMatch(e -> "弘光".equals(e.eraName()) && e.eraYear() == 1);
+    }
+
+    @Test
+    @DisplayName("所有年号所属朝代名称均应在朝代列表中存在（数据自洽性）")
+    void shouldEnsureAllEraDynastiesExistInDynastiesList() {
+        Set<String> dynastyNames =
+                service.getDynasties().stream().map(Dynasty::name).collect(Collectors.toSet());
+        for (Era era : service.getEras()) {
+            assertThat(dynastyNames).contains(era.dynastyName());
+        }
+    }
+
+    @Test
+    @DisplayName("自然语言支持'XX朝'后缀（明朝/清朝/唐朝等）")
+    void shouldSupportDynastyChaoSuffix() {
+        List<GregorianMatchResult> resMing = service.eraToGregorian("明朝崇祯十七年");
+        assertThat(resMing).containsExactly(new GregorianMatchResult(1644, "明", "崇祯", 17, "甲申"));
+
+        List<GregorianMatchResult> resQing = service.eraToGregorian("清朝康熙元年");
+        assertThat(resQing).containsExactly(new GregorianMatchResult(1662, "清", "康熙", 1, "壬寅"));
+
+        List<GregorianMatchResult> resTang = service.eraToGregorian("唐朝贞观元年");
+        assertThat(resTang).containsExactly(new GregorianMatchResult(627, "唐", "贞观", 1, "丁亥"));
+
+        assertThatThrownBy(() -> service.parseEraString("明朝"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("无法匹配年号格式");
+        assertThatThrownBy(() -> service.parseEraString("明朝崇祯"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("输入缺少有效的年份数字");
+        assertThatThrownBy(() -> service.parseEraString("明朝崇祯年"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("输入缺少有效的年份数字");
+    }
+
+    @Test
+    @DisplayName("繁简修正年号验证（开运/龙飞/广运）")
+    void shouldHandleCorrectedSimplifiedEras() {
+        List<GregorianMatchResult> resKaiyun = service.eraToGregorian("开运元年");
+        assertThat(resKaiyun).anyMatch(e -> "后晋".equals(e.dynastyName()) && e.gregorianYear() == 944);
+
+        List<GregorianMatchResult> resLongfei = service.eraToGregorian("龙飞元年");
+        assertThat(resLongfei).anyMatch(e -> "后凉".equals(e.dynastyName()) && e.gregorianYear() == 395);
+
+        List<GregorianMatchResult> resGuangyun = service.eraToGregorian("广运元年");
+        assertThat(resGuangyun).anyMatch(e -> "东梁".equals(e.dynastyName()) && e.gregorianYear() == 586);
+    }
+
+    @Test
+    @DisplayName("三国东吴'天册'年号错字修正")
+    void shouldHandleTianCeCorrection() {
+        List<GregorianMatchResult> res1 = service.eraToGregorian("吴天册元年");
+        assertThat(res1).containsExactly(new GregorianMatchResult(275, "三国吴", "天册", 1, "乙未"));
+
+        List<GregorianMatchResult> res2 = service.eraToGregorian("天册元年");
+        assertThat(res2).anyMatch(e -> "三国吴".equals(e.dynastyName()) && e.gregorianYear() == 275);
+    }
+
+    @Test
+    @DisplayName("隋末王世充'郑'政权归一化及历史兼容")
+    void shouldHandleZhengDynastyNormalization() {
+        List<GregorianMatchResult> res1 = service.eraToGregorian("郑开明元年");
+        assertThat(res1).containsExactly(new GregorianMatchResult(619, "郑", "开明", 1, "己卯"));
+
+        List<GregorianMatchResult> res2 = service.eraToGregorian("开明", 1, "郑");
+        assertThat(res2).containsExactly(new GregorianMatchResult(619, "郑", "开明", 1, "己卯"));
+
+        List<GregorianMatchResult> res3 = service.eraToGregorian("开明", 1, "郑（王世充）");
+        assertThat(res3).containsExactly(new GregorianMatchResult(619, "郑", "开明", 1, "己卯"));
+    }
+
+    @Test
+    @DisplayName("古典文献数字'卌'(40)与非贪婪正则切分验证")
+    void shouldHandleXianYearNumber() {
+        List<GregorianMatchResult> res = service.eraToGregorian("康熙卌一年");
+        assertThat(res).containsExactly(new GregorianMatchResult(1702, "清", "康熙", 41, "壬午"));
+    }
+
+    @Test
+    @DisplayName("全角数字与空格容错清洗验证")
+    void shouldHandleFullWidthAndWhitespace() {
+        List<GregorianMatchResult> resSpace = service.eraToGregorian("崇祯 17 年");
+        assertThat(resSpace).containsExactly(new GregorianMatchResult(1644, "明", "崇祯", 17, "甲申"));
+
+        List<GregorianMatchResult> resFullWidth = service.eraToGregorian("崇祯１７年");
+        assertThat(resFullWidth).containsExactly(new GregorianMatchResult(1644, "明", "崇祯", 17, "甲申"));
+    }
+
+    @Test
+    @DisplayName("南朝朝代单向映射：'宋'匹配'刘宋'，'梁'匹配'南梁'")
+    void shouldHandleSouthernDynastiesMapping() {
+        // 宋元嘉元年 -> 刘宋文帝元嘉元年 (424年)
+        List<GregorianMatchResult> resSongYuanjia = service.eraToGregorian("宋元嘉元年");
+        assertThat(resSongYuanjia).containsExactly(new GregorianMatchResult(424, "刘宋", "元嘉", 1, "甲子"));
+
+        List<GregorianMatchResult> resSongParam = service.eraToGregorian("元嘉", 1, "宋");
+        assertThat(resSongParam).containsExactly(new GregorianMatchResult(424, "刘宋", "元嘉", 1, "甲子"));
+
+        // 梁大同元年 -> 南梁武帝大同元年 (535年)
+        List<GregorianMatchResult> resLiangDatong = service.eraToGregorian("梁大同元年");
+        assertThat(resLiangDatong).containsExactly(new GregorianMatchResult(535, "南梁", "大同", 1, "乙卯"));
     }
 }

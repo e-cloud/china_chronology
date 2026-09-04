@@ -31,7 +31,10 @@ export const DYNASTY_EQUIVALENTS: Record<string, string[]> = {
   "吴（杨）": ["杨吴", "吴(杨)", "吴（杨）"],
   马楚: ["马楚", "楚(马)", "楚（马）"],
   "楚(马)": ["马楚", "楚(马)", "楚（马）"],
-  "楚（马）": ["马楚", "楚(马)", "楚（马）"]
+  "楚（马）": ["马楚", "楚(马)", "楚（马）"],
+  郑: ["郑", "郑（王世充）", "郑(王世充)"],
+  "郑（王世充）": ["郑", "郑（王世充）", "郑(王世充)"],
+  "郑(王世充)": ["郑", "郑（王世充）", "郑(王世充)"]
 };
 
 /**
@@ -41,7 +44,9 @@ export const DYNASTY_CHILDREN: Record<string, string[]> = {
   汉: ["西汉", "东汉"],
   晋: ["西晋", "东晋"],
   齐: ["南齐", "北齐"],
-  宋: ["北宋", "南宋"],
+  宋: ["北宋", "南宋", "刘宋"],
+  梁: ["南梁", "西梁", "后梁"],
+  陈: ["南陈", "陈"],
   魏: ["三国魏", "曹魏", "北魏", "西魏", "东魏"],
   蜀: ["三国蜀", "蜀汉"],
   吴: ["三国吴", "孙吴", "东吴"],
@@ -134,16 +139,16 @@ export class ChronologyService {
   // --- 1. 基础数据列表查询 ---
 
   getDynasties(): Dynasty[] {
-    return this.dynasties;
+    return [...this.dynasties];
   }
 
   getEras(dynastyName?: string): Era[] {
-    if (!dynastyName) return this.eras;
+    if (!dynastyName) return [...this.eras];
     return this.eras.filter((e) => matchDynasty(dynastyName, e.dynastyName, e.rawDynastyName));
   }
 
   getGanzhiList(): string[] {
-    return this.ganzhiList;
+    return [...this.ganzhiList];
   }
 
   // --- 2. 文本解析辅助函数 ---
@@ -155,37 +160,43 @@ export class ChronologyService {
     if (!input) {
       throw new Error(`无法匹配年号格式: "${input}"`);
     }
-    const trimmed = input.trim();
-    if (!trimmed) {
+    // 标准化：清除所有空白字符（包括空格、制表符等），并将全角数字转换为半角数字
+    let cleaned = input.replace(/\s+/g, "");
+    cleaned = cleaned.replace(/[\uFF10-\uFF19]/g, (ch) =>
+      String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
+    );
+
+    if (!cleaned) {
       throw new Error(`无法匹配年号格式: "${input}"`);
     }
 
     // 若用户直接输入了纯年号或朝代+年号且无年份数字（含末尾带'年'），抛出明确异常，防止误吞
-    const withoutNian = trimmed.endsWith("年") ? trimmed.slice(0, -1).trim() : trimmed;
-    if (this.eraNamesSet.has(trimmed) || this.eraNamesSet.has(withoutNian)) {
+    const withoutNian = cleaned.endsWith("年") ? cleaned.slice(0, -1).trim() : cleaned;
+    if (this.eraNamesSet.has(cleaned) || this.eraNamesSet.has(withoutNian)) {
       throw new Error(`输入缺少有效的年份数字: "${input}"`);
     }
     for (const d of this.sortedDynasties) {
-      if (trimmed.startsWith(d.name)) {
-        const remaining = trimmed.slice(d.name.length).trim();
-        if (this.eraNamesSet.has(remaining)) {
-          throw new Error(`输入缺少有效的年份数字: "${input}"`);
+      const checkPureEra = (target: string) => {
+        if (target.startsWith(d.name)) {
+          let remaining = target.slice(d.name.length).trim();
+          if (remaining.startsWith("朝")) {
+            remaining = remaining.slice(1).trim();
+          }
+          if (this.eraNamesSet.has(remaining)) {
+            throw new Error(`输入缺少有效的年份数字: "${input}"`);
+          }
         }
-      }
-      if (withoutNian.startsWith(d.name)) {
-        const remaining = withoutNian.slice(d.name.length).trim();
-        if (this.eraNamesSet.has(remaining)) {
-          throw new Error(`输入缺少有效的年份数字: "${input}"`);
-        }
-      }
+      };
+      checkPureEra(cleaned);
+      checkPureEra(withoutNian);
     }
 
-    // 格式切分：末尾带“年”或纯阿拉伯/中文数字
+    // 格式切分：末尾带“年”或纯阿拉伯/中文数字（支持廿/卅/卌）
     let match: RegExpMatchArray | null = null;
-    if (trimmed.endsWith("年")) {
-      match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅]+|元)年$/);
+    if (cleaned.endsWith("年")) {
+      match = cleaned.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅卌]+|元)年$/);
     } else {
-      match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅]+|元)$/);
+      match = cleaned.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅卌]+|元)$/);
     }
 
     if (!match) {
@@ -205,10 +216,14 @@ export class ChronologyService {
       return { eraName: prefix, eraYear };
     }
 
-    // 情况 B: 前缀包含朝代（如 "明崇祯"、"曹魏黄初"、"晋泰始"、"武周天授"）
+    // 情况 B: 前缀包含朝代（如 "明崇祯"、"明朝崇祯"、"曹魏黄初"、"晋泰始"、"武周天授"）
     for (const d of this.sortedDynasties) {
       if (prefix.startsWith(d.name)) {
-        const remaining = prefix.slice(d.name.length).trim();
+        let remaining = prefix.slice(d.name.length).trim();
+        // 兼容口语中带 "朝" 字（如 "明朝崇祯"、"清朝康熙"、"唐朝贞观"）
+        if (remaining.startsWith("朝")) {
+          remaining = remaining.slice(1).trim();
+        }
         if (this.eraNamesSet.has(remaining)) {
           return {
             dynastyName: d.name,
@@ -308,7 +323,11 @@ export class ChronologyService {
       targetDynasty = arg3;
     }
 
-    if (typeof targetEraYear !== "number" || !Number.isInteger(targetEraYear) || targetEraYear <= 0) {
+    if (
+      typeof targetEraYear !== "number" ||
+      !Number.isInteger(targetEraYear) ||
+      targetEraYear <= 0
+    ) {
       throw new Error(`非法的年号年份: ${targetEraYear}`);
     }
 

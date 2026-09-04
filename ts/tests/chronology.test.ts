@@ -265,9 +265,13 @@ describe("ChronologyService 核心互转与消歧", () => {
 
       // 通称魏太和二十年（太和在位477-499，20年仅北魏存在）
       const resWei = service.eraToGregorian("魏太和二十年");
-      expect(resWei).toContainEqual(
-        { gregorianYear: 496, dynastyName: "北魏", eraName: "太和", eraYear: 20, ganzhi: "丙子" }
-      );
+      expect(resWei).toContainEqual({
+        gregorianYear: 496,
+        dynastyName: "北魏",
+        eraName: "太和",
+        eraYear: 20,
+        ganzhi: "丙子"
+      });
 
       // 刘宋元嘉元年 (424年，甲子)
       const resLiuSong = service.eraToGregorian("刘宋元嘉元年");
@@ -395,7 +399,9 @@ describe("ChronologyService 核心互转与消歧", () => {
 
       // 2. 1945 年（抗战胜利）应正常包含民国34年
       const res1945 = service.gregorianToEra(1945);
-      expect(res1945.some((e) => e.eraYear === 34 && (e.eraName === "中华民国" || e.eraName === "民国"))).toBe(true);
+      expect(
+        res1945.some((e) => e.eraYear === 34 && (e.eraName === "中华民国" || e.eraName === "民国"))
+      ).toBe(true);
 
       // 3. 支持“民国”简称自然语言查询
       const resMinguoYuan = service.eraToGregorian("民国元年");
@@ -430,6 +436,155 @@ describe("ChronologyService 核心互转与消歧", () => {
       expect(() => service.gregorianToEra(2024.5)).toThrow("非法的公历年份");
       expect(() => service.gregorianToEra(NaN)).toThrow("非法的公历年份");
       expect(() => service.eraToGregorian("崇祯", 1.5)).toThrow("非法的年号年份");
+    });
+
+    it("弘光年号应准确对应1645年（不存在弘光二年）", () => {
+      const res1 = service.eraToGregorian("弘光元年");
+      expect(res1).toEqual([
+        { gregorianYear: 1645, dynastyName: "南明", eraName: "弘光", eraYear: 1, ganzhi: "乙酉" }
+      ]);
+      const res2 = service.eraToGregorian("弘光二年");
+      expect(res2).toEqual([]);
+      const resHongguang1644 = service.gregorianToEra(1644);
+      expect(resHongguang1644.some((m) => m.eraName === "弘光")).toBe(false);
+      const resHongguang1645 = service.gregorianToEra(1645);
+      expect(resHongguang1645.some((m) => m.eraName === "弘光" && m.eraYear === 1)).toBe(true);
+    });
+
+    it("所有年号所属朝代名称均应在朝代列表中存在（数据自洽性）", () => {
+      const dynastyNames = new Set(service.getDynasties().map((d) => d.name));
+      for (const era of service.getEras()) {
+        expect(dynastyNames.has(era.dynastyName)).toBe(true);
+      }
+    });
+
+    it("自然语言支持'XX朝'后缀（明朝/清朝/唐朝等）", () => {
+      const resMing = service.eraToGregorian("明朝崇祯十七年");
+      expect(resMing).toEqual([
+        { gregorianYear: 1644, dynastyName: "明", eraName: "崇祯", eraYear: 17, ganzhi: "甲申" }
+      ]);
+
+      const resQing = service.eraToGregorian("清朝康熙元年");
+      expect(resQing).toEqual([
+        { gregorianYear: 1662, dynastyName: "清", eraName: "康熙", eraYear: 1, ganzhi: "壬寅" }
+      ]);
+
+      const resTang = service.eraToGregorian("唐朝贞观元年");
+      expect(resTang).toEqual([
+        { gregorianYear: 627, dynastyName: "唐", eraName: "贞观", eraYear: 1, ganzhi: "丁亥" }
+      ]);
+
+      // 防误吞：输入 "明朝"（无年号）应抛出无法匹配年号格式；输入 "明朝崇祯"（有年号无年份）抛出缺少年份数字
+      expect(() => service.parseEraString("明朝")).toThrow("无法匹配年号格式");
+      expect(() => service.parseEraString("明朝崇祯")).toThrow("输入缺少有效的年份数字");
+      expect(() => service.parseEraString("明朝崇祯年")).toThrow("输入缺少有效的年份数字");
+    });
+
+    it("繁简修正年号验证（开运/龙飞/广运）", () => {
+      // 后晋出帝石重贵 开运元年 (944年)
+      const resKaiyun = service.eraToGregorian("开运元年");
+      expect(resKaiyun.some((e) => e.dynastyName === "后晋" && e.gregorianYear === 944)).toBe(true);
+
+      // 后凉吕光 龙飞元年 (395年)
+      const resLongfei = service.eraToGregorian("龙飞元年");
+      expect(resLongfei.some((e) => e.dynastyName === "后凉" && e.gregorianYear === 395)).toBe(
+        true
+      );
+
+      // 东梁萧琮 广运元年 (586年)
+      const resGuangyun = service.eraToGregorian("广运元年");
+      expect(resGuangyun.some((e) => e.dynastyName === "东梁" && e.gregorianYear === 586)).toBe(
+        true
+      );
+    });
+
+    it("三国东吴'天册'年号错字修正", () => {
+      // 孙皓天册元年 (275年，乙未)
+      const resTianCe1 = service.eraToGregorian("吴天册元年");
+      expect(resTianCe1).toEqual([
+        { gregorianYear: 275, dynastyName: "三国吴", eraName: "天册", eraYear: 1, ganzhi: "乙未" }
+      ]);
+
+      const resTianCe2 = service.eraToGregorian("天册元年");
+      expect(resTianCe2.some((e) => e.dynastyName === "三国吴" && e.gregorianYear === 275)).toBe(
+        true
+      );
+    });
+
+    it("隋末王世充'郑'政权归一化及历史兼容", () => {
+      // 支持规范的 "郑开明元年"
+      const resZheng1 = service.eraToGregorian("郑开明元年");
+      expect(resZheng1).toEqual([
+        { gregorianYear: 619, dynastyName: "郑", eraName: "开明", eraYear: 1, ganzhi: "己卯" }
+      ]);
+
+      // 支持参数消歧
+      const resZheng2 = service.eraToGregorian("开明", 1, "郑");
+      expect(resZheng2).toEqual([
+        { gregorianYear: 619, dynastyName: "郑", eraName: "开明", eraYear: 1, ganzhi: "己卯" }
+      ]);
+
+      // 兼容学术旧称 "郑（王世充）"
+      const resZheng3 = service.eraToGregorian("开明", 1, "郑（王世充）");
+      expect(resZheng3).toEqual([
+        { gregorianYear: 619, dynastyName: "郑", eraName: "开明", eraYear: 1, ganzhi: "己卯" }
+      ]);
+    });
+
+    it("古典文献数字'卌'(40)与非贪婪正则切分验证", () => {
+      const resXian = service.eraToGregorian("康熙卌一年");
+      expect(resXian).toEqual([
+        { gregorianYear: 1702, dynastyName: "清", eraName: "康熙", eraYear: 41, ganzhi: "壬午" }
+      ]);
+    });
+
+    it("全角数字与空格容错清洗验证", () => {
+      // 空格容错
+      const resSpace = service.eraToGregorian("崇祯 17 年");
+      expect(resSpace).toEqual([
+        { gregorianYear: 1644, dynastyName: "明", eraName: "崇祯", eraYear: 17, ganzhi: "甲申" }
+      ]);
+
+      // 全角数字容错
+      const resFullWidth = service.eraToGregorian("崇祯１７年");
+      expect(resFullWidth).toEqual([
+        { gregorianYear: 1644, dynastyName: "明", eraName: "崇祯", eraYear: 17, ganzhi: "甲申" }
+      ]);
+    });
+
+    it("南朝朝代单向映射：'宋'匹配'刘宋'，'梁'匹配'南梁'", () => {
+      // 宋元嘉元年 -> 刘宋文帝元嘉元年 (424年)
+      const resSongYuanjia = service.eraToGregorian("宋元嘉元年");
+      expect(resSongYuanjia).toEqual([
+        { gregorianYear: 424, dynastyName: "刘宋", eraName: "元嘉", eraYear: 1, ganzhi: "甲子" }
+      ]);
+      const resSongParam = service.eraToGregorian("元嘉", 1, "宋");
+      expect(resSongParam).toEqual([
+        { gregorianYear: 424, dynastyName: "刘宋", eraName: "元嘉", eraYear: 1, ganzhi: "甲子" }
+      ]);
+
+      // 梁大同元年 -> 南梁武帝大同元年 (535年)
+      const resLiangDatong = service.eraToGregorian("梁大同元年");
+      expect(resLiangDatong).toEqual([
+        { gregorianYear: 535, dynastyName: "南梁", eraName: "大同", eraYear: 1, ganzhi: "乙卯" }
+      ]);
+    });
+
+    it("防篡改浅拷贝测试：外部修改 getter 返回数组不污染内部状态", () => {
+      const originalErasCount = service.getEras().length;
+      const erasCopy = service.getEras();
+      erasCopy.pop();
+      expect(service.getEras().length).toBe(originalErasCount);
+
+      const originalDynastiesCount = service.getDynasties().length;
+      const dynastiesCopy = service.getDynasties();
+      dynastiesCopy.pop();
+      expect(service.getDynasties().length).toBe(originalDynastiesCount);
+
+      const originalGanzhiCount = service.getGanzhiList().length;
+      const ganzhiCopy = service.getGanzhiList();
+      ganzhiCopy.pop();
+      expect(service.getGanzhiList().length).toBe(originalGanzhiCount);
     });
   });
 });

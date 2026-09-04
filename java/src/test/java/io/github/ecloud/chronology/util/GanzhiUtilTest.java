@@ -76,5 +76,16 @@ class GanzhiUtilTest {
         assertThat(GanzhiUtil.ganzhiToGregorian("甲子", 1900, 2000)).containsExactly(1924, 1984);
         // 跨公元前后区间（-2 到 2，测试过滤 0 年逻辑）
         assertThat(GanzhiUtil.ganzhiToGregorian("庚申", -2, 2)).containsExactly(-1);
+
+        assertThatThrownBy(() -> GanzhiUtil.ganzhiToGregorian("甲子", 0, 2020))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("历史上无公元 0 年");
+        assertThatThrownBy(() -> GanzhiUtil.ganzhiToGregorian("甲子", 1900, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("历史上无公元 0 年");
+        assertThatThrownBy(() -> GanzhiUtil.ganzhiToGregorian("甲子", 1, 10002))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("公历检索范围跨度过大");
+        assertThat(GanzhiUtil.ganzhiToGregorian("甲子", 2020, 2000)).isEmpty();
     }
 }

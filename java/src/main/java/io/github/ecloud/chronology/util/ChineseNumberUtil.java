@@ -59,7 +59,7 @@ public final class ChineseNumberUtil {
             throw new IllegalArgumentException("非法的年号年份: \"" + yearStr + "\"");
         }
 
-        // 支持古典文献中的 "廿" (20) 与 "卅" (30)
+        // 支持古典文献中的 "廿" (20)、"卅" (30) 与 "卌" (40)
         if ("廿".equals(trimmed)) {
             return 20;
         }
@@ -77,6 +77,16 @@ public final class ChineseNumberUtil {
             Integer ones = CN_NUM_MAP.get(trimmed.charAt(1));
             if (ones != null && ones > 0) {
                 return 30 + ones;
+            }
+        }
+
+        if ("卌".equals(trimmed)) {
+            return 40;
+        }
+        if (trimmed.startsWith("卌") && trimmed.length() == 2) {
+            Integer ones = CN_NUM_MAP.get(trimmed.charAt(1));
+            if (ones != null && ones > 0) {
+                return 40 + ones;
             }
         }
 
@@ -106,7 +116,7 @@ public final class ChineseNumberUtil {
                     ones = CN_NUM_MAP.get(onesPart.charAt(0));
                 }
 
-                if (tens >= 0 && ones >= 0) {
+                if (tens > 0 && (onesPart.isEmpty() ? ones == 0 : ones > 0)) {
                     return tens * 10 + ones;
                 }
             }

@@ -114,7 +114,7 @@
     },
     {
       "id": 28,
-      "name": "宋(刘)"
+      "name": "刘宋"
     },
     {
       "id": 29,
@@ -142,7 +142,7 @@
     },
     {
       "id": 36,
-      "name": "吴(杨)"
+      "name": "杨吴"
     },
     {
       "id": 37,
@@ -150,7 +150,7 @@
     },
     {
       "id": 38,
-      "name": "楚(马)"
+      "name": "马楚"
     },
     {
       "id": 39,
@@ -314,7 +314,7 @@
     },
     {
       "id": 81,
-      "name": "郑（王世充）"
+      "name": "郑"
     },
     {
       "id": 82,
@@ -1355,7 +1355,7 @@
       "dynastyId": 42,
       "dynastyName": "三国吴",
       "rawDynastyName": "三国吴",
-      "name": "天鍹",
+      "name": "天册",
       "startYear": 275,
       "endYear": 276
     },
@@ -1482,15 +1482,6 @@
       "dynastyName": "西晋",
       "rawDynastyName": "西晋",
       "name": "建武",
-      "startYear": 304,
-      "endYear": 304
-    },
-    {
-      "id": 127,
-      "dynastyId": 23,
-      "dynastyName": "西晋",
-      "rawDynastyName": "西晋",
-      "name": "永安",
       "startYear": 304,
       "endYear": 304
     },
@@ -2156,7 +2147,7 @@
       "dynastyId": 73,
       "dynastyName": "后凉",
       "rawDynastyName": "后凉",
-      "name": "龙飛",
+      "name": "龙飞",
       "startYear": 395,
       "endYear": 397
     },
@@ -3452,7 +3443,7 @@
       "dynastyId": 68,
       "dynastyName": "东梁",
       "rawDynastyName": "东梁",
-      "name": "广運",
+      "name": "广运",
       "startYear": 586,
       "endYear": 587
     },
@@ -3504,7 +3495,7 @@
     {
       "id": 682,
       "dynastyId": 81,
-      "dynastyName": "郑（王世充）",
+      "dynastyName": "郑",
       "rawDynastyName": "郑（王世充）",
       "name": "开明",
       "startYear": 619,
@@ -4631,7 +4622,7 @@
       "dynastyId": 48,
       "dynastyName": "后晋",
       "rawDynastyName": "后晋",
-      "name": "开運",
+      "name": "开运",
       "startYear": 944,
       "endYear": 946
     },
@@ -4775,7 +4766,7 @@
       "dynastyId": 66,
       "dynastyName": "北汉",
       "rawDynastyName": "北汉",
-      "name": "广運",
+      "name": "广运",
       "startYear": 974,
       "endYear": 979
     },
@@ -4964,7 +4955,7 @@
       "dynastyId": 78,
       "dynastyName": "西夏",
       "rawDynastyName": "西夏",
-      "name": "开運",
+      "name": "开运",
       "startYear": 1034,
       "endYear": 1034
     },
@@ -4973,7 +4964,7 @@
       "dynastyId": 78,
       "dynastyName": "西夏",
       "rawDynastyName": "西夏",
-      "name": "广運",
+      "name": "广运",
       "startYear": 1034,
       "endYear": 1035
     },
@@ -6333,7 +6324,7 @@
       "dynastyName": "南明",
       "rawDynastyName": "南明",
       "name": "弘光",
-      "startYear": 1644,
+      "startYear": 1645,
       "endYear": 1645
     },
     {

@@ -35,7 +35,7 @@ export function parseEraYearNumber(yearStr: string): number {
     九: 9
   };
 
-  // 支持古典文献中的 "廿" (20) 与 "卅" (30)
+  // 支持古典文献中的 "廿" (20)、"卅" (30) 与 "卌" (40)
   if (trimmed === "廿") return 20;
   if (trimmed.startsWith("廿")) {
     const ones = cnNumMap[trimmed.slice(1)];
@@ -46,6 +46,11 @@ export function parseEraYearNumber(yearStr: string): number {
     const ones = cnNumMap[trimmed.slice(1)];
     if (ones !== undefined && ones > 0) return 30 + ones;
   }
+  if (trimmed === "卌") return 40;
+  if (trimmed.startsWith("卌")) {
+    const ones = cnNumMap[trimmed.slice(1)];
+    if (ones !== undefined && ones > 0) return 40 + ones;
+  }
 
   if (trimmed === "十") return 10;
   if (trimmed.includes("十")) {
@@ -54,7 +59,7 @@ export function parseEraYearNumber(yearStr: string): number {
       const [tensPart, onesPart] = parts;
       const tens = tensPart ? (cnNumMap[tensPart] ?? -1) : 1;
       const ones = onesPart ? (cnNumMap[onesPart] ?? -1) : 0;
-      if (tens >= 0 && ones >= 0) {
+      if (tens > 0 && (onesPart === "" ? ones === 0 : ones > 0)) {
         return tens * 10 + ones;
       }
     }

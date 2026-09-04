@@ -31,8 +31,8 @@ public class ChronologyService {
     private static final String DEFAULT_DATA_PATH = "/data/chronology_data.json";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final Pattern PATTERN_WITH_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅]+|元)年$");
-    private static final Pattern PATTERN_WITHOUT_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅]+|元)$");
+    private static final Pattern PATTERN_WITH_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅卌]+|元)年$");
+    private static final Pattern PATTERN_WITHOUT_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅卌]+|元)$");
 
     /**
      * 朝代同义等价表（双向对等，表示同一政权的不同称呼）
@@ -70,13 +70,18 @@ public class ChronologyService {
         eq.put("马楚", List.of("马楚", "楚(马)", "楚（马）"));
         eq.put("楚(马)", List.of("马楚", "楚(马)", "楚（马）"));
         eq.put("楚（马）", List.of("马楚", "楚(马)", "楚（马）"));
+        eq.put("郑", List.of("郑", "郑（王世充）", "郑(王世充)"));
+        eq.put("郑（王世充）", List.of("郑", "郑（王世充）", "郑(王世充)"));
+        eq.put("郑(王世充)", List.of("郑", "郑（王世充）", "郑(王世充)"));
         DYNASTY_EQUIVALENTS = Collections.unmodifiableMap(eq);
 
         Map<String, List<String>> ch = new LinkedHashMap<>();
         ch.put("汉", List.of("西汉", "东汉"));
         ch.put("晋", List.of("西晋", "东晋"));
         ch.put("齐", List.of("南齐", "北齐"));
-        ch.put("宋", List.of("北宋", "南宋"));
+        ch.put("宋", List.of("北宋", "南宋", "刘宋"));
+        ch.put("梁", List.of("南梁", "西梁", "后梁"));
+        ch.put("陈", List.of("南陈", "陈"));
         ch.put("魏", List.of("三国魏", "曹魏", "北魏", "西魏", "东魏"));
         ch.put("蜀", List.of("三国蜀", "蜀汉"));
         ch.put("吴", List.of("三国吴", "孙吴", "东吴"));
@@ -141,7 +146,7 @@ public class ChronologyService {
         }
 
         List<String> sortedList = new ArrayList<>(allDynastyNames);
-        sortedList.sort(Comparator.comparingInt(String::length).reversed());
+        sortedList.sort(Comparator.comparingInt(String::length).reversed().thenComparing(Comparator.naturalOrder()));
         this.sortedDynasties = Collections.unmodifiableList(sortedList);
 
         // 60 干支列表初始化
@@ -240,39 +245,41 @@ public class ChronologyService {
         if (input == null) {
             throw new IllegalArgumentException("无法匹配年号格式: \"null\"");
         }
-        String trimmed = input.trim();
-        if (trimmed.isEmpty()) {
+        // 预处理：清除所有空白字符并将全角数字转换为半角数字
+        String cleaned = input.replaceAll("\\s+", "");
+        StringBuilder sb = new StringBuilder(cleaned.length());
+        for (int i = 0; i < cleaned.length(); i++) {
+            char c = cleaned.charAt(i);
+            if (c >= '\uFF10' && c <= '\uFF19') {
+                sb.append((char) (c - 0xFEE0));
+            } else {
+                sb.append(c);
+            }
+        }
+        cleaned = sb.toString();
+
+        if (cleaned.isEmpty()) {
             throw new IllegalArgumentException("无法匹配年号格式: \"" + input + "\"");
         }
 
         // 若用户直接输入了纯年号或朝代+年号且无年份数字（含带'年'字），抛出明确异常，防止误吞
-        String withoutNian = trimmed.endsWith("年")
-                ? trimmed.substring(0, trimmed.length() - 1).trim()
-                : trimmed;
-        if (this.eraNamesSet.contains(trimmed) || this.eraNamesSet.contains(withoutNian)) {
+        String withoutNian = cleaned.endsWith("年")
+                ? cleaned.substring(0, cleaned.length() - 1).trim()
+                : cleaned;
+        if (this.eraNamesSet.contains(cleaned) || this.eraNamesSet.contains(withoutNian)) {
             throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
         }
         for (String dName : this.sortedDynasties) {
-            if (trimmed.startsWith(dName)) {
-                String remaining = trimmed.substring(dName.length()).trim();
-                if (this.eraNamesSet.contains(remaining)) {
-                    throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
-                }
-            }
-            if (withoutNian.startsWith(dName)) {
-                String remaining = withoutNian.substring(dName.length()).trim();
-                if (this.eraNamesSet.contains(remaining)) {
-                    throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + input + "\"");
-                }
-            }
+            checkPureEra(dName, cleaned, input);
+            checkPureEra(dName, withoutNian, input);
         }
 
-        // 正则切分：末尾带“年”或纯阿拉伯/中文数字
+        // 正则切分：末尾带“年”或纯阿拉伯/中文数字（支持廿/卅/卌）
         Matcher matcher;
-        if (trimmed.endsWith("年")) {
-            matcher = PATTERN_WITH_YEAR.matcher(trimmed);
+        if (cleaned.endsWith("年")) {
+            matcher = PATTERN_WITH_YEAR.matcher(cleaned);
         } else {
-            matcher = PATTERN_WITHOUT_YEAR.matcher(trimmed);
+            matcher = PATTERN_WITHOUT_YEAR.matcher(cleaned);
         }
 
         if (!matcher.matches()) {
@@ -292,10 +299,14 @@ public class ChronologyService {
             return new ParsedEraQuery(null, prefix, eraYear);
         }
 
-        // 情况 B: 前缀包含朝代（如 "明崇祯"、"曹魏黄初"、"晋泰始"、"武周天授"）
+        // 情况 B: 前缀包含朝代（如 "明崇祯"、"明朝崇祯"、"曹魏黄初"、"晋泰始"、"武周天授"）
         for (String dName : this.sortedDynasties) {
             if (prefix.startsWith(dName)) {
                 String remaining = prefix.substring(dName.length()).trim();
+                // 兼容口语中带 "朝" 字（如 "明朝崇祯"、"清朝康熙"、"唐朝贞观"）
+                if (remaining.startsWith("朝")) {
+                    remaining = remaining.substring(1).trim();
+                }
                 if (this.eraNamesSet.contains(remaining)) {
                     return new ParsedEraQuery(dName, remaining, eraYear);
                 }
@@ -304,6 +315,18 @@ public class ChronologyService {
 
         // 兜底返回前缀作为年号
         return new ParsedEraQuery(null, prefix, eraYear);
+    }
+
+    private void checkPureEra(String dName, String target, String originalInput) {
+        if (target.startsWith(dName)) {
+            String remaining = target.substring(dName.length()).trim();
+            if (remaining.startsWith("朝")) {
+                remaining = remaining.substring(1).trim();
+            }
+            if (this.eraNamesSet.contains(remaining)) {
+                throw new IllegalArgumentException("输入缺少有效的年份数字: \"" + originalInput + "\"");
+            }
+        }
     }
 
     // --- 3. 公历与干支互转 ---

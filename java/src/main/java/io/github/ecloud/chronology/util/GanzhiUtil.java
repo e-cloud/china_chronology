@@ -86,8 +86,14 @@ public final class GanzhiUtil {
      * @return 范围内的公历年份列表
      */
     public static List<Integer> ganzhiToGregorian(String ganzhi, int startYear, int endYear, List<String> ganzhiList) {
+        if (startYear == 0 || endYear == 0) {
+            throw new IllegalArgumentException("历史上无公元 0 年");
+        }
         if (startYear > endYear) {
             return List.of();
+        }
+        if ((long) endYear - (long) startYear > 10000L) {
+            throw new IllegalArgumentException("公历检索范围跨度过大 (最大允许 10000 年): [" + startYear + ", " + endYear + "]");
         }
 
         int targetIdx = ganzhiList.indexOf(ganzhi);

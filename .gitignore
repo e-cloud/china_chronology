@@ -13,3 +13,8 @@ bin/
 out/
 *.class
 *.jar
+gradle.properties
+*.gpg
+*.asc
+*.key
+

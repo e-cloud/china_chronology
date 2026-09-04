@@ -44,16 +44,9 @@ jobs:
             exit 1
           fi
 
-      - name: 执行测试与代码检查
-        run: pnpm lint && pnpm test
-        working-directory: ts
-
-      - name: 构建产物
-        run: pnpm build
-        working-directory: ts
-
-      - name: 发布至 NPM
+      - name: 构建、检验并发布至 NPM (自动触发 prepublishOnly)
         run: pnpm publish --no-git-checks --provenance --tag ${{ inputs.tag }}
         working-directory: ts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+

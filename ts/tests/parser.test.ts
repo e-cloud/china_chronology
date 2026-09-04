@@ -113,7 +113,9 @@ describe("ChronologyService parseEraString 自然语言解析", () => {
     expect(() => service.parseEraString("")).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString("   ")).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString(null as unknown as string)).toThrow("无法匹配年号格式");
-    expect(() => service.parseEraString(undefined as unknown as string)).toThrow("无法匹配年号格式");
+    expect(() => service.parseEraString(undefined as unknown as string)).toThrow(
+      "无法匹配年号格式"
+    );
     expect(() => service.parseEraString("abcd")).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString("十年")).toThrow("输入缺少有效的年号名称");
     expect(() => service.parseEraString("贞观0年")).toThrow("非法的年号年份");

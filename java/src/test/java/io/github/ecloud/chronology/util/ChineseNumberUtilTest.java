@@ -68,7 +68,7 @@ class ChineseNumberUtilTest {
     }
 
     @Test
-    @DisplayName("应正确解析古典文献'廿'与'卅'")
+    @DisplayName("应正确解析古典文献'廿'、'卅'与'卌'")
     void testNianAndSa() {
         assertThat(ChineseNumberUtil.parseEraYearNumber("廿")).isEqualTo(20);
         assertThat(ChineseNumberUtil.parseEraYearNumber("廿一")).isEqualTo(21);
@@ -77,6 +77,9 @@ class ChineseNumberUtilTest {
         assertThat(ChineseNumberUtil.parseEraYearNumber("卅")).isEqualTo(30);
         assertThat(ChineseNumberUtil.parseEraYearNumber("卅一")).isEqualTo(31);
         assertThat(ChineseNumberUtil.parseEraYearNumber("卅五")).isEqualTo(35);
+        assertThat(ChineseNumberUtil.parseEraYearNumber("卌")).isEqualTo(40);
+        assertThat(ChineseNumberUtil.parseEraYearNumber("卌一")).isEqualTo(41);
+        assertThat(ChineseNumberUtil.parseEraYearNumber("卌九")).isEqualTo(49);
     }
 
     @Test
@@ -110,6 +113,10 @@ class ChineseNumberUtilTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("无法识别年份数字");
 
+        assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("卌零"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("无法识别年份数字");
+
         assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("0"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("非法的年号年份");
@@ -117,5 +124,13 @@ class ChineseNumberUtilTest {
         assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("零"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("非法的年号年份");
+
+        assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("零十"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("无法识别年份数字");
+
+        assertThatThrownBy(() -> ChineseNumberUtil.parseEraYearNumber("一十零"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("无法识别年份数字");
     }
 }

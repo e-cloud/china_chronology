@@ -41,11 +41,22 @@ export function ganzhiToGregorian(
   endYear: number,
   ganzhiList: string[] = DEFAULT_GANZHI_LIST
 ): number[] {
-  if (typeof startYear !== "number" || !Number.isInteger(startYear) || typeof endYear !== "number" || !Number.isInteger(endYear)) {
+  if (
+    typeof startYear !== "number" ||
+    !Number.isInteger(startYear) ||
+    typeof endYear !== "number" ||
+    !Number.isInteger(endYear)
+  ) {
     throw new Error(`非法的公历检索范围: [${startYear}, ${endYear}]`);
+  }
+  if (startYear === 0 || endYear === 0) {
+    throw new Error("历史上无公元 0 年");
   }
   if (startYear > endYear) {
     return [];
+  }
+  if (endYear - startYear > 10000) {
+    throw new Error(`公历检索范围跨度过大 (最大允许 10000 年): [${startYear}, ${endYear}]`);
   }
 
   const targetIdx = ganzhiList.indexOf(ganzhi);

@@ -63,7 +63,8 @@ T2S_MAP = {
     '曆': '历', '昇': '升', '楊': '杨', '烏': '乌', '璽': '玺', '監': '监',
     '緒': '绪', '羅': '罗', '聰': '聪', '視': '视', '詳': '详', '調': '调',
     '證': '证', '賜': '赐', '贏': '嬴', '輔': '辅', '閩': '闽', '雲': '云',
-    '韓': '韩', '馬': '马', '鮮': '鲜', '麗': '丽', '龜': '龟'
+    '韓': '韩', '馬': '马', '鮮': '鲜', '麗': '丽', '龜': '龟',
+    '運': '运', '飛': '飞'
 }
 
 def to_simp(text: str) -> str:
@@ -72,7 +73,7 @@ def to_simp(text: str) -> str:
     return "".join(T2S_MAP.get(c, c) for c in text).strip()
 
 def normalize_dynasty_name(raw_dynasty: str) -> str:
-    """朝代名称规范化：西汉/东汉归一为'汉'，宋(刘)归一为'刘宋'，吴(杨)归一为'杨吴'，楚(马)归一为'马楚'"""
+    """朝代名称规范化：西汉/东汉归一为'汉'，宋(刘)归一为'刘宋'，吴(杨)归一为'杨吴'，楚(马)归一为'马楚'，郑(王世充)归一为'郑'"""
     simp = to_simp(raw_dynasty)
     if simp in ("西汉", "东汉"):
         return "汉"
@@ -82,6 +83,8 @@ def normalize_dynasty_name(raw_dynasty: str) -> str:
         return "杨吴"
     if simp in ("楚(马)", "楚（马）"):
         return "马楚"
+    if simp in ("郑(王世充)", "郑（王世充）"):
+        return "郑"
     return simp
 
 def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTPUT_PATH):
@@ -104,9 +107,9 @@ def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTP
     for row in raw_dynasties:
         dy_id = row[0]
         raw_name = row[1].strip()
-        simp_name = to_simp(raw_name)
-        if simp_name:
-            dynasty_dict[dy_id] = simp_name
+        norm_name = normalize_dynasty_name(raw_name)
+        if norm_name:
+            dynasty_dict[dy_id] = norm_name
 
     # 构造真实朝代列表，修复字典推导式解包 bug
     dynasties = [
@@ -116,6 +119,14 @@ def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTP
     # 保证包含通用的 "汉" 映射 (id: 83)
     if not any(d["name"] == "汉" for d in dynasties):
         dynasties.append({"id": 83, "name": "汉"})
+
+    # 已知学术与史实数据校准补丁（修正 CBDB 机械录入瑕疵）
+    ERA_PATCHES = {
+        # 112: 三国吴末帝孙皓“天册”。CBDB 错录为异体冷僻字“天鍹”，依据《三国志》校正为“天册”。
+        112: {"name": "天册"},
+        # 670: 南明弘光。1644年五月即位，诏以明年（1645年）为弘光元年，当年仍奉崇祯十七年。弘光实际仅行用1645年一年。
+        670: {"startYear": 1645, "endYear": 1645},
+    }
 
     # 2. 提取年号（关联朝代名称，过滤无起止年份的记录）
     cursor.execute("""
@@ -148,6 +159,16 @@ def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTP
         norm_dy_name = normalize_dynasty_name(raw_dy_name)
         simp_era_name = to_simp(raw_era_name)
 
+        # 应用史实补丁
+        if era_id in ERA_PATCHES:
+            patch = ERA_PATCHES[era_id]
+            if "startYear" in patch:
+                start_year = patch["startYear"]
+            if "endYear" in patch:
+                end_year = patch["endYear"]
+            if "name" in patch:
+                simp_era_name = patch["name"]
+
         eras.append({
             "id": era_id,
             "dynastyId": dy_id,
@@ -157,6 +178,16 @@ def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTP
             "startYear": start_year,
             "endYear": end_year
         })
+
+    # 去除完全重复的年号（如西晋惠帝304年永安重复记录）
+    deduped_eras = []
+    seen_era_keys = set()
+    for e in eras:
+        key = (e["dynastyName"], e["name"], e["startYear"], e["endYear"])
+        if key not in seen_era_keys:
+            seen_era_keys.add(key)
+            deduped_eras.append(e)
+    eras = deduped_eras
 
     # 3. 提取 60 干支代码表（适配真实的 c_ganzhi_code 与过滤代码0）
     cursor.execute("""

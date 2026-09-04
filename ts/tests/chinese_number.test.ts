@@ -41,7 +41,7 @@ describe("parseEraYearNumber", () => {
     expect(parseEraYearNumber("六十一")).toBe(61);
   });
 
-  it("应正确解析古典文献'廿'与'卅'", () => {
+  it("应正确解析古典文献'廿'、'卅'与'卌'", () => {
     expect(parseEraYearNumber("廿")).toBe(20);
     expect(parseEraYearNumber("廿一")).toBe(21);
     expect(parseEraYearNumber("廿五")).toBe(25);
@@ -49,6 +49,9 @@ describe("parseEraYearNumber", () => {
     expect(parseEraYearNumber("卅")).toBe(30);
     expect(parseEraYearNumber("卅一")).toBe(31);
     expect(parseEraYearNumber("卅五")).toBe(35);
+    expect(parseEraYearNumber("卌")).toBe(40);
+    expect(parseEraYearNumber("卌一")).toBe(41);
+    expect(parseEraYearNumber("卌九")).toBe(49);
   });
 
   it("非法输入应抛出错误", () => {
@@ -59,7 +62,10 @@ describe("parseEraYearNumber", () => {
     expect(() => parseEraYearNumber("十十")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("廿零")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("卅零")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("卌零")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("0")).toThrow("非法的年号年份");
     expect(() => parseEraYearNumber("零")).toThrow("非法的年号年份");
+    expect(() => parseEraYearNumber("零十")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("一十零")).toThrow("无法识别年份数字");
   });
 });

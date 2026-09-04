@@ -64,11 +64,13 @@ chronology.eraToGregorian("汉建元二年");
 // 或 chronology.eraToGregorian("建元", 2, "汉");
 // => [ { gregorianYear: -139, dynastyName: '汉', eraName: '建元', eraYear: 2, ganzhi: '壬寅' } ]
 
-// 3. 公历查朝代年号与干支（1644 年明清交替并存）
+// 3. 公历查朝代年号与干支（1644 年明清交替与割据政权并立）
 chronology.gregorianToEra(1644);
-// => [
+// => 返回该年所有在位/并存政权年号（明崇祯17年、清顺治元年、大顺永昌元年、大西大顺元年等）
+// [
 //   { dynastyName: '明', eraName: '崇祯', eraYear: 17, eraYearDisplay: '崇祯17年', gregorianYear: 1644, ganzhi: '甲申' },
-//   { dynastyName: '清', eraName: '顺治', eraYear: 1, eraYearDisplay: '顺治元年', gregorianYear: 1644, ganzhi: '甲申' }
+//   { dynastyName: '清', eraName: '顺治', eraYear: 1, eraYearDisplay: '顺治元年', gregorianYear: 1644, ganzhi: '甲申' },
+//   ...
 // ]
 
 // 4. 三国与武周等复杂政权消歧
@@ -111,9 +113,9 @@ List<GregorianMatchResult> res1 = Chronology.eraToGregorian("明崇祯十七年"
 List<GregorianMatchResult> allJianyuan = Chronology.eraToGregorian("建元2年"); // 返回汉、东晋、前秦、南齐全部命中
 List<GregorianMatchResult> hanJianyuan = Chronology.eraToGregorian("建元", 2, "汉"); // 精准锁定汉武帝建元二年 (-139年)
 
-// 3. 公历年份反查朝代年号（1644 年明清交替并存）
+// 3. 公历年份反查朝代年号（1644 年明清交替与割据政权并立）
 List<EraMatchResult> era1644 = Chronology.gregorianToEra(1644);
-// 包含：明崇祯17年、清顺治元年
+// 返回该年所有并立政权（包含明崇祯17年、清顺治元年、大顺永昌元年、大西大顺元年等）
 
 // 4. 干支与公历双向互转
 String ganzhi = Chronology.gregorianToGanzhi(1644); // "甲申"

@@ -52,8 +52,11 @@ describe("ganzhi utils", () => {
       expect(() => gregorianToGanzhi(NaN)).toThrow("非法的公历年份");
       expect(() => ganzhiToGregorian("甲子", 2000.5, 2020)).toThrow("非法的公历检索范围");
       expect(() => ganzhiToGregorian("甲子", 2000, 2020.5)).toThrow("非法的公历检索范围");
+      expect(() => ganzhiToGregorian("甲子", 0, 2020)).toThrow("历史上无公元 0 年");
+      expect(() => ganzhiToGregorian("甲子", 1900, 0)).toThrow("历史上无公元 0 年");
       expect(ganzhiToGregorian("甲子", 2020, 2000)).toEqual([]);
       expect(ganzhiToGregorian("甲子", 1980, 1982)).toEqual([]);
+      expect(() => ganzhiToGregorian("甲子", 1, 10002)).toThrow("公历检索范围跨度过大");
     });
   });
 });

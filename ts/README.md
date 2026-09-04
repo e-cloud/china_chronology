@@ -19,11 +19,13 @@ pnpm add china-chronology
 ### Java (Gradle / Maven)
 
 #### Gradle (Kotlin DSL)
+
 ```kotlin
 implementation("io.github.e-cloud:china-chronology:0.1.0")
 ```
 
 #### Maven
+
 ```xml
 <dependency>
     <groupId>io.github.e-cloud</groupId>
@@ -130,6 +132,7 @@ List<Integer> years = Chronology.ganzhiToGregorian("甲申", 1600, 1650); // [16
 若您有自己的年号数据集，也可以实例化 `ChronologyService`：
 
 **TypeScript / JavaScript**:
+
 ```typescript
 import { ChronologyService } from "china-chronology";
 import type { ChronologyDataset } from "china-chronology";
@@ -138,6 +141,7 @@ const customService = new ChronologyService(myDataset);
 ```
 
 **Java**:
+
 ```java
 import io.github.ecloud.chronology.ChronologyService;
 import io.github.ecloud.chronology.model.ChronologyDataset;
