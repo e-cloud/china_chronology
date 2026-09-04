@@ -119,12 +119,19 @@ describe("ChronologyService 核心互转与消歧", () => {
   });
 
   describe("基础查询接口与构造选项覆盖", () => {
-    it("getDynasties 应返回朝代列表", () => {
+    it("getDynasties 应返回合法的数值 ID 与有效朝代名称列表（非垃圾数据）", () => {
       const dynasties = service.getDynasties();
-      expect(dynasties.length).toBeGreaterThan(0);
+      expect(dynasties.length).toBeGreaterThan(50);
+      expect(typeof dynasties[0].id).toBe("number");
+      expect(typeof dynasties[0].name).toBe("string");
+      expect(dynasties[0].name).not.toBe("name");
+      expect(dynasties[0].name).not.toBe("id");
+      expect(dynasties.some((d) => d.name === "唐")).toBe(true);
+      expect(dynasties.some((d) => d.name === "明")).toBe(true);
+      expect(dynasties.some((d) => d.name === "汉")).toBe(true);
     });
 
-    it("getEras 应支持全部与按朝代过滤", () => {
+    it("getEras 应支持全部与按朝代及朝代别名过滤", () => {
       const allEras = service.getEras();
       expect(allEras.length).toBeGreaterThan(0);
 
@@ -136,6 +143,31 @@ describe("ChronologyService 核心互转与消歧", () => {
 
       const rawXiHanEras = service.getEras("西汉");
       expect(rawXiHanEras.length).toBeGreaterThan(0);
+
+      // 三国与武周别名过滤
+      expect(service.getEras("曹魏").length).toBeGreaterThan(0);
+      expect(service.getEras("蜀汉").length).toBeGreaterThan(0);
+      expect(service.getEras("孙吴").length).toBeGreaterThan(0);
+      expect(service.getEras("武周").length).toBeGreaterThan(0);
+      expect(service.getEras("不存在朝代")).toEqual([]);
+
+      // 验证 rawDynastyName 命中别名分支
+      const customAliasService = new ChronologyService({
+        dynasties: [{ id: 1, name: "地方割据" }],
+        eras: [
+          {
+            id: 1,
+            dynastyId: 1,
+            dynastyName: "地方割据",
+            rawDynastyName: "西汉",
+            name: "自建年号",
+            startYear: 10,
+            endYear: 15
+          }
+        ],
+        ganzhi: defaultDataset.ganzhi
+      });
+      expect(customAliasService.getEras("汉")).toHaveLength(1);
     });
 
     it("getGanzhiList 应返回 60 干支", () => {
@@ -152,6 +184,73 @@ describe("ChronologyService 核心互转与消歧", () => {
         ganzhi: []
       });
       expect(fallbackService.getGanzhiList()).toHaveLength(60);
+    });
+  });
+
+  describe("真实历史学复杂政权消歧与繁简汉字全域验证", () => {
+    it("三国政权别名消歧（曹魏/魏、孙吴/东吴/吴、蜀汉/蜀）", () => {
+      const resWei1 = service.eraToGregorian("曹魏黄初元年");
+      expect(resWei1).toEqual([
+        { gregorianYear: 220, dynastyName: "三国魏", eraName: "黄初", eraYear: 1, ganzhi: "庚子" }
+      ]);
+
+      const resWei2 = service.eraToGregorian("魏黄初元年");
+      expect(resWei2).toEqual([
+        { gregorianYear: 220, dynastyName: "三国魏", eraName: "黄初", eraYear: 1, ganzhi: "庚子" }
+      ]);
+
+      const resWu1 = service.eraToGregorian("孙吴黄武元年");
+      expect(resWu1).toEqual([
+        { gregorianYear: 222, dynastyName: "三国吴", eraName: "黄武", eraYear: 1, ganzhi: "壬寅" }
+      ]);
+
+      const resWu2 = service.eraToGregorian("东吴黄龙元年");
+      expect(resWu2).toEqual([
+        { gregorianYear: 229, dynastyName: "三国吴", eraName: "黄龙", eraYear: 1, ganzhi: "己酉" }
+      ]);
+    });
+
+    it("晋代单字与分期朝代消歧（彻底解决单字假闭环反噬）", () => {
+      // 输入全称单字朝代 "晋泰始元年"
+      const resJin1 = service.eraToGregorian("晋泰始元年");
+      expect(resJin1).toEqual([
+        { gregorianYear: 265, dynastyName: "西晋", eraName: "泰始", eraYear: 1, ganzhi: "乙酉" }
+      ]);
+
+      // 输入具体朝代 "西晋泰始元年"
+      const resJin2 = service.eraToGregorian("西晋泰始元年");
+      expect(resJin2).toEqual([
+        { gregorianYear: 265, dynastyName: "西晋", eraName: "泰始", eraYear: 1, ganzhi: "乙酉" }
+      ]);
+    });
+
+    it("武周政权与周朝别名消歧", () => {
+      const resZhou1 = service.eraToGregorian("武周天授元年");
+      expect(resZhou1).toEqual([
+        { gregorianYear: 690, dynastyName: "周", eraName: "天授", eraYear: 1, ganzhi: "庚寅" }
+      ]);
+
+      const resZhou2 = service.eraToGregorian("周天授元年");
+      expect(resZhou2).toEqual([
+        { gregorianYear: 690, dynastyName: "周", eraName: "天授", eraYear: 1, ganzhi: "庚寅" }
+      ]);
+    });
+
+    it("繁体字清洗后的年号（地节、鸿嘉、居摄）正常检索", () => {
+      // 汉宣帝 地节元年 (-69年)
+      expect(service.eraToGregorian("汉地节元年")).toEqual([
+        { gregorianYear: -69, dynastyName: "汉", eraName: "地节", eraYear: 1, ganzhi: "壬子" }
+      ]);
+
+      // 汉成帝 鸿嘉元年 (-20年)
+      expect(service.eraToGregorian("汉鸿嘉元年")).toEqual([
+        { gregorianYear: -20, dynastyName: "汉", eraName: "鸿嘉", eraYear: 1, ganzhi: "辛丑" }
+      ]);
+
+      // 孺子婴 居摄元年 (公元6年)
+      expect(service.eraToGregorian("汉居摄元年")).toEqual([
+        { gregorianYear: 6, dynastyName: "汉", eraName: "居摄", eraYear: 1, ganzhi: "丙寅" }
+      ]);
     });
   });
 

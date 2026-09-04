@@ -62,7 +62,7 @@ describe("ChronologyService parseEraString 自然语言解析", () => {
     });
   });
 
-  it("末尾无'年'字也能正常解析", () => {
+  it("末尾无'年'字也能正常解析纯阿拉伯数字", () => {
     const res = service.parseEraString("康熙61");
     expect(res).toEqual({
       eraName: "康熙",
@@ -70,8 +70,30 @@ describe("ChronologyService parseEraString 自然语言解析", () => {
     });
   });
 
+  it("支持朝代与年号间带空格与廿/卅自然语言解析", () => {
+    const res1 = service.parseEraString("唐 贞观八年");
+    expect(res1).toEqual({
+      dynastyName: "唐",
+      eraName: "贞观",
+      eraYear: 8
+    });
+
+    const res2 = service.parseEraString("乾隆廿五年");
+    expect(res2).toEqual({
+      eraName: "乾隆",
+      eraYear: 25
+    });
+  });
+
+  it("当仅输入年号而缺少年份数字时应抛出对应异常（防止吞字）", () => {
+    expect(() => service.parseEraString("开元")).toThrow("输入缺少有效的年份数字");
+    expect(() => service.parseEraString("唐开元")).toThrow("输入缺少有效的年份数字");
+    expect(() => service.parseEraString("崇祯")).toThrow("输入缺少有效的年份数字");
+  });
+
   it("非法输入应抛出对应异常", () => {
     expect(() => service.parseEraString("")).toThrow("无法匹配年号格式");
+    expect(() => service.parseEraString("abcd")).toThrow("无法匹配年号格式");
     expect(() => service.parseEraString("十年")).toThrow("输入缺少有效的年号名称");
   });
 });

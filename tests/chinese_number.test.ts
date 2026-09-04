@@ -41,10 +41,23 @@ describe("parseEraYearNumber", () => {
     expect(parseEraYearNumber("六十一")).toBe(61);
   });
 
+  it("应正确解析古典文献'廿'与'卅'", () => {
+    expect(parseEraYearNumber("廿")).toBe(20);
+    expect(parseEraYearNumber("廿一")).toBe(21);
+    expect(parseEraYearNumber("廿五")).toBe(25);
+    expect(parseEraYearNumber("廿九")).toBe(29);
+    expect(parseEraYearNumber("卅")).toBe(30);
+    expect(parseEraYearNumber("卅一")).toBe(31);
+    expect(parseEraYearNumber("卅五")).toBe(35);
+  });
+
   it("非法输入应抛出错误", () => {
     expect(() => parseEraYearNumber("abc")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("百十八")).toThrow("无法识别年份数字");
     expect(() => parseEraYearNumber("十百")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("十十")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("廿零")).toThrow("无法识别年份数字");
+    expect(() => parseEraYearNumber("卅零")).toThrow("无法识别年份数字");
   });
 });

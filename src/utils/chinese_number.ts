@@ -12,8 +12,17 @@ export function parseEraYearNumber(yearStr: string): number {
   }
 
   const cnNumMap: Record<string, number> = {
-    零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5,
-    六: 6, 七: 7, 八: 8, 九: 9
+    零: 0,
+    一: 1,
+    二: 2,
+    两: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9
   };
 
   // 支持古典文献中的 "廿" (20) 与 "卅" (30)
