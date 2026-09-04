@@ -1,0 +1,52 @@
+{
+  "name": "china-chronology",
+  "version": "0.1.0",
+  "description": "中国历代纪年、公历年份与天干地支双向互转库（基于哈佛/中研院/北大 CBDB 数据库）",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./data": {
+      "types": "./dist/data/index.d.ts",
+      "import": "./dist/data/index.js",
+      "require": "./dist/data/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "extract": "python scripts/extract_cbdb.py",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm test && pnpm build"
+  },
+  "keywords": [
+    "chronology",
+    "china",
+    "dynasty",
+    "nianhao",
+    "cbdb",
+    "ganzhi",
+    "gregorian",
+    "chinese-history"
+  ],
+  "author": "group-e-cloud",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0",
+    "vitest": "^4.1.11"
+  }
+}
