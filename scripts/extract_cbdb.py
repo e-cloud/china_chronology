@@ -3,7 +3,7 @@ import json
 import os
 import sys
 
-DEFAULT_DB_PATH = "e:/github/cbdb_sqlite/cbdb_20260829.sqlite3"
+DEFAULT_DB_PATH = os.environ.get("CBDB_PATH", "cbdb.sqlite3")
 DEFAULT_OUTPUT_PATH = "data/chronology_data.json"
 
 # 繁简字符映射表（涵盖 CBDB 所有涉及的朝代、年号与干支字集）

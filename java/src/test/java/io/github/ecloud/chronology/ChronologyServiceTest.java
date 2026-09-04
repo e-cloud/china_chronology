@@ -290,4 +290,83 @@ class ChronologyServiceTest {
         List<GregorianMatchResult> res = service.eraToGregorian("贞观", 1);
         assertThat(res).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("朝代消歧穿透防护：西汉/东汉、北宋/南宋严格互斥")
+    void shouldPreventDynastyPenetration() {
+        // 1. 东汉历史上无“建元”年号，查东汉建元应为空
+        assertThat(service.eraToGregorian("建元", 1, "东汉")).isEmpty();
+        assertThat(service.eraToGregorian("东汉建元元年")).isEmpty();
+
+        // 2. 西汉历史上无“建武”年号，查西汉建武应为空
+        assertThat(service.eraToGregorian("建武", 1, "西汉")).isEmpty();
+        assertThat(service.eraToGregorian("西汉建武元年")).isEmpty();
+
+        // 3. getEras("西汉") 绝不应包含东汉年号（如“建武”）
+        List<Era> xiHanEras = service.getEras("西汉");
+        assertThat(xiHanEras).noneMatch(e -> e.name().equals("建武"));
+        assertThat(xiHanEras).anyMatch(e -> e.name().equals("建元"));
+
+        // 4. 北宋开国建隆（960年），查南宋建隆应为空
+        assertThat(service.eraToGregorian("建隆", 1, "南宋")).isEmpty();
+        assertThat(service.eraToGregorian("南宋建隆元年")).isEmpty();
+
+        // 5. 查北宋建隆或宋建隆应正常匹配
+        assertThat(service.eraToGregorian("建隆", 1, "北宋")).hasSize(1);
+        assertThat(service.eraToGregorian("建隆", 1, "宋")).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("近现代纪年分期截断与'民国'简称开箱即用")
+    void shouldHandleMinguoEraProperly() {
+        // 1. 2024 年不应再反查出中华民国或民国年号
+        List<EraMatchResult> res2024 = service.gregorianToEra(2024);
+        assertThat(res2024)
+                .noneMatch(e -> e.dynastyName().equals("中华民国") || e.eraName().equals("民国"));
+
+        // 2. 1945 年（抗战胜利）应包含民国34年
+        List<EraMatchResult> res1945 = service.gregorianToEra(1945);
+        assertThat(res1945)
+                .anyMatch(e -> e.eraYear() == 34
+                        && (e.eraName().equals("中华民国") || e.eraName().equals("民国")));
+
+        // 3. 支持“民国”简称自然语言查询
+        List<GregorianMatchResult> resMinguoYuan = service.eraToGregorian("民国元年");
+        assertThat(resMinguoYuan).anyMatch(e -> e.gregorianYear() == 1912);
+
+        List<GregorianMatchResult> resMinguo34 = service.eraToGregorian("民国34年");
+        assertThat(resMinguo34).anyMatch(e -> e.gregorianYear() == 1945);
+
+        List<GregorianMatchResult> resMinguoZh = service.eraToGregorian("民国三十四年");
+        assertThat(resMinguoZh).anyMatch(e -> e.gregorianYear() == 1945);
+    }
+
+    @Test
+    @DisplayName("末尾无'年'字时的纯中文数字自然语言切分与两参数字符串重载支持")
+    void shouldHandleWithoutNianAndTwoArgOverload() {
+        // 明崇祯十七
+        ParsedEraQuery p1 = service.parseEraString("明崇祯十七");
+        assertThat(p1.dynastyName()).isEqualTo("明");
+        assertThat(p1.eraName()).isEqualTo("崇祯");
+        assertThat(p1.eraYear()).isEqualTo(17);
+
+        // 崇祯十七
+        ParsedEraQuery p2 = service.parseEraString("崇祯十七");
+        assertThat(p2.eraName()).isEqualTo("崇祯");
+        assertThat(p2.eraYear()).isEqualTo(17);
+
+        // 贞观二
+        ParsedEraQuery p3 = service.parseEraString("贞观二");
+        assertThat(p3.eraName()).isEqualTo("贞观");
+        assertThat(p3.eraYear()).isEqualTo(2);
+
+        // 康熙六十一
+        ParsedEraQuery p4 = service.parseEraString("康熙六十一");
+        assertThat(p4.eraName()).isEqualTo("康熙");
+        assertThat(p4.eraYear()).isEqualTo(61);
+
+        // eraToGregorian(String, String) 两参数字符串年份重载
+        List<GregorianMatchResult> resStrTwoArg = service.eraToGregorian("崇祯", "十七");
+        assertThat(resStrTwoArg).containsExactly(new GregorianMatchResult(1644, "明", "崇祯", 17, "甲申"));
+    }
 }

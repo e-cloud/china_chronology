@@ -32,65 +32,69 @@ public class ChronologyService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final Pattern PATTERN_WITH_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅]+|元)年$");
-    private static final Pattern PATTERN_DIGIT_ONLY = Pattern.compile("^(.*?)(\\d+)$");
+    private static final Pattern PATTERN_WITHOUT_YEAR = Pattern.compile("^(.*?)(\\d+|[一二两三四五六七八九十廿卅]+|元)$");
 
     /**
-     * 朝代别名与分期归一化映射
+     * 朝代同义等价表（双向对等，表示同一政权的不同称呼）
+     */
+    public static final Map<String, List<String>> DYNASTY_EQUIVALENTS;
+
+    /**
+     * 朝代父子层级包含树（单向继承：父朝代向下包含各分期/政权，子朝代不可逆向匹配父代或兄弟代）
+     */
+    public static final Map<String, List<String>> DYNASTY_CHILDREN;
+
+    /**
+     * 朝代别名与分期归一化映射（兼容向后暴露）
      */
     public static final Map<String, List<String>> DYNASTY_ALIASES;
 
     static {
-        Map<String, List<String>> map = new LinkedHashMap<>();
-        map.put("汉", List.of("西汉", "东汉", "汉"));
-        map.put("西汉", List.of("汉", "西汉"));
-        map.put("东汉", List.of("汉", "东汉"));
-        map.put("晋", List.of("西晋", "东晋", "晋"));
-        map.put("西晋", List.of("晋", "西晋"));
-        map.put("东晋", List.of("晋", "东晋"));
-        map.put("齐", List.of("南齐", "北齐", "齐"));
-        map.put("南齐", List.of("齐", "南齐"));
-        map.put("北齐", List.of("齐", "北齐"));
-        map.put("秦", List.of("嬴秦", "前秦", "后秦", "西秦", "秦"));
-        map.put("嬴秦", List.of("秦", "嬴秦"));
-        map.put("前秦", List.of("秦", "前秦"));
-        map.put("后秦", List.of("秦", "后秦"));
-        map.put("西秦", List.of("秦", "西秦"));
-        map.put("赵", List.of("前赵", "后赵", "赵"));
-        map.put("前赵", List.of("赵", "前赵"));
-        map.put("后赵", List.of("赵", "后赵"));
-        map.put("凉", List.of("前凉", "后凉", "西凉", "北凉", "南凉", "凉"));
-        map.put("前凉", List.of("凉", "前凉"));
-        map.put("后凉", List.of("凉", "后凉"));
-        map.put("西凉", List.of("凉", "西凉"));
-        map.put("北凉", List.of("凉", "北凉"));
-        map.put("南凉", List.of("凉", "南凉"));
-        map.put("燕", List.of("前燕", "后燕", "南燕", "北燕", "燕"));
-        map.put("前燕", List.of("燕", "前燕"));
-        map.put("后燕", List.of("燕", "后燕"));
-        map.put("南燕", List.of("燕", "南燕"));
-        map.put("北燕", List.of("燕", "北燕"));
-        map.put("魏", List.of("三国魏", "曹魏", "北魏", "西魏", "东魏", "魏"));
-        map.put("曹魏", List.of("三国魏", "曹魏", "魏"));
-        map.put("三国魏", List.of("三国魏", "曹魏", "魏"));
-        map.put("北魏", List.of("魏", "北魏"));
-        map.put("东魏", List.of("魏", "东魏"));
-        map.put("西魏", List.of("魏", "西魏"));
-        map.put("蜀", List.of("三国蜀", "蜀汉", "蜀"));
-        map.put("蜀汉", List.of("三国蜀", "蜀汉", "蜀"));
-        map.put("三国蜀", List.of("三国蜀", "蜀汉", "蜀"));
-        map.put("吴", List.of("三国吴", "孙吴", "东吴", "吴"));
-        map.put("孙吴", List.of("三国吴", "孙吴", "东吴", "吴"));
-        map.put("东吴", List.of("三国吴", "孙吴", "东吴", "吴"));
-        map.put("三国吴", List.of("三国吴", "孙吴", "东吴", "吴"));
-        map.put("武周", List.of("周", "武周"));
-        map.put("周", List.of("周", "武周", "北周", "后周"));
-        map.put("宋", List.of("宋", "南宋", "北宋"));
-        map.put("南宋", List.of("宋", "南宋"));
-        map.put("北宋", List.of("宋", "北宋"));
-        map.put("刘宋", List.of("刘宋", "宋(刘)", "宋（刘）"));
-        map.put("杨吴", List.of("杨吴", "吴(杨)", "吴（杨）"));
-        map.put("马楚", List.of("马楚", "楚(马)", "楚（马）"));
-        DYNASTY_ALIASES = Collections.unmodifiableMap(map);
+        Map<String, List<String>> eq = new LinkedHashMap<>();
+        eq.put("民国", List.of("中华民国", "民国"));
+        eq.put("中华民国", List.of("中华民国", "民国"));
+        eq.put("曹魏", List.of("三国魏", "曹魏"));
+        eq.put("三国魏", List.of("三国魏", "曹魏"));
+        eq.put("蜀汉", List.of("三国蜀", "蜀汉"));
+        eq.put("三国蜀", List.of("三国蜀", "蜀汉"));
+        eq.put("孙吴", List.of("三国吴", "孙吴", "东吴"));
+        eq.put("东吴", List.of("三国吴", "孙吴", "东吴"));
+        eq.put("三国吴", List.of("三国吴", "孙吴", "东吴"));
+        eq.put("武周", List.of("周", "武周"));
+        eq.put("刘宋", List.of("刘宋", "宋(刘)", "宋（刘）"));
+        eq.put("宋(刘)", List.of("刘宋", "宋(刘)", "宋（刘）"));
+        eq.put("宋（刘）", List.of("刘宋", "宋(刘)", "宋（刘）"));
+        eq.put("杨吴", List.of("杨吴", "吴(杨)", "吴（杨）"));
+        eq.put("吴(杨)", List.of("杨吴", "吴(杨)", "吴（杨）"));
+        eq.put("吴（杨）", List.of("杨吴", "吴(杨)", "吴（杨）"));
+        eq.put("马楚", List.of("马楚", "楚(马)", "楚（马）"));
+        eq.put("楚(马)", List.of("马楚", "楚(马)", "楚（马）"));
+        eq.put("楚（马）", List.of("马楚", "楚(马)", "楚（马）"));
+        DYNASTY_EQUIVALENTS = Collections.unmodifiableMap(eq);
+
+        Map<String, List<String>> ch = new LinkedHashMap<>();
+        ch.put("汉", List.of("西汉", "东汉"));
+        ch.put("晋", List.of("西晋", "东晋"));
+        ch.put("齐", List.of("南齐", "北齐"));
+        ch.put("宋", List.of("北宋", "南宋"));
+        ch.put("魏", List.of("三国魏", "曹魏", "北魏", "西魏", "东魏"));
+        ch.put("蜀", List.of("三国蜀", "蜀汉"));
+        ch.put("吴", List.of("三国吴", "孙吴", "东吴"));
+        ch.put("周", List.of("周", "武周", "北周", "后周"));
+        ch.put("秦", List.of("嬴秦", "前秦", "后秦", "西秦"));
+        ch.put("赵", List.of("前赵", "后赵"));
+        ch.put("燕", List.of("前燕", "后燕", "南燕", "北燕", "西燕"));
+        ch.put("凉", List.of("前凉", "后凉", "西凉", "北凉", "南凉"));
+        DYNASTY_CHILDREN = Collections.unmodifiableMap(ch);
+
+        Map<String, List<String>> aliases = new LinkedHashMap<>(eq);
+        for (Map.Entry<String, List<String>> entry : ch.entrySet()) {
+            java.util.Set<String> set =
+                    new java.util.LinkedHashSet<>(aliases.getOrDefault(entry.getKey(), List.of(entry.getKey())));
+            set.addAll(entry.getValue());
+            aliases.put(entry.getKey(), List.copyOf(set));
+        }
+        DYNASTY_ALIASES = Collections.unmodifiableMap(aliases);
     }
 
     private final List<Dynasty> dynasties;
@@ -176,15 +180,23 @@ public class ChronologyService {
         if (Objects.equals(target, eraDynasty) || (eraRawDynasty != null && Objects.equals(target, eraRawDynasty))) {
             return true;
         }
-        List<String> aliases = DYNASTY_ALIASES.get(target);
-        if (aliases != null) {
-            if (aliases.contains(eraDynasty)) {
-                return true;
-            }
-            if (eraRawDynasty != null && aliases.contains(eraRawDynasty)) {
+
+        // 1. 同义别名匹配（双向等价，如“曹魏”<=>“三国魏”、“民国”<=>“中华民国”）
+        List<String> equiv = DYNASTY_EQUIVALENTS.get(target);
+        if (equiv != null) {
+            if (equiv.contains(eraDynasty) || (eraRawDynasty != null && equiv.contains(eraRawDynasty))) {
                 return true;
             }
         }
+
+        // 2. 父朝代向子朝代单向匹配（如 target="汉"，可匹配归属于西汉、东汉的年号）
+        List<String> children = DYNASTY_CHILDREN.get(target);
+        if (children != null) {
+            if (children.contains(eraDynasty) || (eraRawDynasty != null && children.contains(eraRawDynasty))) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -255,12 +267,12 @@ public class ChronologyService {
             }
         }
 
-        // 正则切分：末尾带“年”或纯阿拉伯数字
+        // 正则切分：末尾带“年”或纯阿拉伯/中文数字
         Matcher matcher;
         if (trimmed.endsWith("年")) {
             matcher = PATTERN_WITH_YEAR.matcher(trimmed);
         } else {
-            matcher = PATTERN_DIGIT_ONLY.matcher(trimmed);
+            matcher = PATTERN_WITHOUT_YEAR.matcher(trimmed);
         }
 
         if (!matcher.matches()) {
@@ -360,6 +372,17 @@ public class ChronologyService {
      */
     public List<GregorianMatchResult> eraToGregorian(String eraName, int eraYear) {
         return eraToGregorian(eraName, eraYear, null);
+    }
+
+    /**
+     * 年号转公历年（带中文数字年份字符串双参数重载）
+     *
+     * @param eraName    年号名称
+     * @param eraYearStr 年号第几年字符串（如 "二"、"元"、"十七"）
+     * @return 匹配结果列表
+     */
+    public List<GregorianMatchResult> eraToGregorian(String eraName, String eraYearStr) {
+        return eraToGregorian(eraName, eraYearStr, null);
     }
 
     /**

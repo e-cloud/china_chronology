@@ -364,5 +364,72 @@ describe("ChronologyService 核心互转与消歧", () => {
         }
       ]);
     });
+
+    it("朝代消歧穿透防护：西汉/东汉、北宋/南宋严格互斥", () => {
+      // 1. 东汉历史上无“建元”年号，查东汉建元应为空
+      expect(service.eraToGregorian("建元", 1, "东汉")).toEqual([]);
+      expect(service.eraToGregorian("东汉建元元年")).toEqual([]);
+
+      // 2. 西汉历史上无“建武”年号，查西汉建武应为空
+      expect(service.eraToGregorian("建武", 1, "西汉")).toEqual([]);
+      expect(service.eraToGregorian("西汉建武元年")).toEqual([]);
+
+      // 3. getEras("西汉") 绝不应包含东汉年号（如“建武”）
+      const xiHanEras = service.getEras("西汉");
+      expect(xiHanEras.some((e) => e.name === "建武")).toBe(false);
+      expect(xiHanEras.some((e) => e.name === "建元")).toBe(true);
+
+      // 4. 北宋开国建隆（960年），查南宋建隆应为空
+      expect(service.eraToGregorian("建隆", 1, "南宋")).toEqual([]);
+      expect(service.eraToGregorian("南宋建隆元年")).toEqual([]);
+
+      // 5. 查北宋建隆或宋建隆应正常匹配
+      expect(service.eraToGregorian("建隆", 1, "北宋")).toHaveLength(1);
+      expect(service.eraToGregorian("建隆", 1, "宋")).toHaveLength(1);
+    });
+
+    it("近现代纪年分期截断与'民国'简称开箱即用", () => {
+      // 1. 2024 年不应再反查出中华民国或民国年号
+      const res2024 = service.gregorianToEra(2024);
+      expect(res2024.some((e) => e.dynastyName === "中华民国" || e.eraName === "民国")).toBe(false);
+
+      // 2. 1945 年（抗战胜利）应正常包含民国34年
+      const res1945 = service.gregorianToEra(1945);
+      expect(res1945.some((e) => e.eraYear === 34 && (e.eraName === "中华民国" || e.eraName === "民国"))).toBe(true);
+
+      // 3. 支持“民国”简称自然语言查询
+      const resMinguoYuan = service.eraToGregorian("民国元年");
+      expect(resMinguoYuan.some((e) => e.gregorianYear === 1912)).toBe(true);
+
+      const resMinguo34 = service.eraToGregorian("民国34年");
+      expect(resMinguo34.some((e) => e.gregorianYear === 1945)).toBe(true);
+
+      const resMinguoZh = service.eraToGregorian("民国三十四年");
+      expect(resMinguoZh.some((e) => e.gregorianYear === 1945)).toBe(true);
+    });
+
+    it("末尾无'年'字时的纯中文数字自然语言切分支持", () => {
+      // 明崇祯十七
+      const p1 = service.parseEraString("明崇祯十七");
+      expect(p1).toEqual({ dynastyName: "明", eraName: "崇祯", eraYear: 17 });
+
+      // 崇祯十七
+      const p2 = service.parseEraString("崇祯十七");
+      expect(p2).toEqual({ eraName: "崇祯", eraYear: 17 });
+
+      // 贞观二
+      const p3 = service.parseEraString("贞观二");
+      expect(p3).toEqual({ eraName: "贞观", eraYear: 2 });
+
+      // 康熙六十一
+      const p4 = service.parseEraString("康熙六十一");
+      expect(p4).toEqual({ eraName: "康熙", eraYear: 61 });
+    });
+
+    it("TS 运行时整型数值防御：拦截浮点数与 NaN", () => {
+      expect(() => service.gregorianToEra(2024.5)).toThrow("非法的公历年份");
+      expect(() => service.gregorianToEra(NaN)).toThrow("非法的公历年份");
+      expect(() => service.eraToGregorian("崇祯", 1.5)).toThrow("非法的年号年份");
+    });
   });
 });

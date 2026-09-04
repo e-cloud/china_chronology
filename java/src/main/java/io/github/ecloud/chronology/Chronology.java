@@ -136,6 +136,17 @@ public final class Chronology {
     }
 
     /**
+     * 年号转公历年份（字符年份双参数重载）
+     *
+     * @param eraName    年号名称
+     * @param eraYearStr 年号年份字符串（如 "二"、"元"、"十七"）
+     * @return 公历反查结果列表
+     */
+    public static List<GregorianMatchResult> eraToGregorian(String eraName, String eraYearStr) {
+        return getDefaultService().eraToGregorian(eraName, eraYearStr);
+    }
+
+    /**
      * 年号转公历年份（字符年份重载）
      *
      * @param eraName     年号名称

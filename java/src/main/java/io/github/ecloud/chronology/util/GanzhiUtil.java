@@ -86,18 +86,39 @@ public final class GanzhiUtil {
      * @return 范围内的公历年份列表
      */
     public static List<Integer> ganzhiToGregorian(String ganzhi, int startYear, int endYear, List<String> ganzhiList) {
+        if (startYear > endYear) {
+            return List.of();
+        }
+
         int targetIdx = ganzhiList.indexOf(ganzhi);
         if (targetIdx == -1) {
             throw new IllegalArgumentException("无效的干支名称: \"" + ganzhi + "\"");
         }
 
-        List<Integer> matchedYears = new ArrayList<>();
-        for (int y = startYear; y <= endYear; y++) {
+        Integer firstMatch = null;
+        int searchLimit = (int) Math.min((long) startYear + 60, (long) endYear);
+        for (int y = startYear; y <= searchLimit; y++) {
             if (y == 0) {
                 continue;
             }
             if (gregorianToGanzhi(y, ganzhiList).equals(ganzhi)) {
-                matchedYears.add(y);
+                firstMatch = y;
+                break;
+            }
+        }
+
+        if (firstMatch == null) {
+            return List.of();
+        }
+
+        List<Integer> matchedYears = new ArrayList<>();
+        int curr = firstMatch;
+        while (curr <= endYear) {
+            matchedYears.add(curr);
+            if (curr < 0 && curr + 60 >= 0) {
+                curr = curr + 60 + 1;
+            } else {
+                curr += 60;
             }
         }
         return Collections.unmodifiableList(matchedYears);

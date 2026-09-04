@@ -37,6 +37,13 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: ts
 
+      - name: 校验主干发布分支
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ] && [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "❌ 错误: 正式发布仅允许在 main/master 主干分支触发！当前分支: ${{ github.ref }}"
+            exit 1
+          fi
+
       - name: 执行测试与代码检查
         run: pnpm lint && pnpm test
         working-directory: ts
@@ -46,7 +53,7 @@ jobs:
         working-directory: ts
 
       - name: 发布至 NPM
-        run: pnpm publish --no-git-checks --tag ${{ inputs.tag }}
+        run: pnpm publish --no-git-checks --provenance --tag ${{ inputs.tag }}
         working-directory: ts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

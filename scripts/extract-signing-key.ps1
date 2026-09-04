@@ -77,5 +77,5 @@ if (-not $NoClipboard) {
     Write-Host "📋 结果已自动存入系统剪贴板，可直接粘贴至 gradle.properties 或 CI Secrets。" -ForegroundColor Green
 }
 
-# 终端输出预览
-Write-Output $result
+# 安全提示：私钥敏感信息不打印到终端控制台，避免 CI/CD 日志泄露
+Write-Host "🔒 私钥提取成功（为保护敏感凭证，终端不打印明文内容）。" -ForegroundColor Cyan

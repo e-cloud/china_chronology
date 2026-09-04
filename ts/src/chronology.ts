@@ -9,67 +9,84 @@ import type {
 import { parseEraYearNumber } from "./utils/chinese_number";
 import { DEFAULT_GANZHI_LIST, gregorianToGanzhi, ganzhiToGregorian } from "./utils/ganzhi";
 
-export const DYNASTY_ALIASES: Record<string, string[]> = {
-  汉: ["西汉", "东汉", "汉"],
-  西汉: ["汉", "西汉"],
-  东汉: ["汉", "东汉"],
-  晋: ["西晋", "东晋", "晋"],
-  西晋: ["晋", "西晋"],
-  东晋: ["晋", "东晋"],
-  齐: ["南齐", "北齐", "齐"],
-  南齐: ["齐", "南齐"],
-  北齐: ["齐", "北齐"],
-  秦: ["嬴秦", "前秦", "后秦", "西秦", "秦"],
-  嬴秦: ["秦", "嬴秦"],
-  前秦: ["秦", "前秦"],
-  后秦: ["秦", "后秦"],
-  西秦: ["秦", "西秦"],
-  赵: ["前赵", "后赵", "赵"],
-  前赵: ["赵", "前赵"],
-  后赵: ["赵", "后赵"],
-  凉: ["前凉", "后凉", "西凉", "北凉", "南凉", "凉"],
-  前凉: ["凉", "前凉"],
-  后凉: ["凉", "后凉"],
-  西凉: ["凉", "西凉"],
-  北凉: ["凉", "北凉"],
-  南凉: ["凉", "南凉"],
-  燕: ["前燕", "后燕", "南燕", "北燕", "燕"],
-  前燕: ["燕", "前燕"],
-  后燕: ["燕", "后燕"],
-  南燕: ["燕", "南燕"],
-  北燕: ["燕", "北燕"],
-  魏: ["三国魏", "曹魏", "北魏", "西魏", "东魏", "魏"],
-  曹魏: ["三国魏", "曹魏", "魏"],
-  三国魏: ["三国魏", "曹魏", "魏"],
-  北魏: ["魏", "北魏"],
-  东魏: ["魏", "东魏"],
-  西魏: ["魏", "西魏"],
-  蜀: ["三国蜀", "蜀汉", "蜀"],
-  蜀汉: ["三国蜀", "蜀汉", "蜀"],
-  三国蜀: ["三国蜀", "蜀汉", "蜀"],
-  吴: ["三国吴", "孙吴", "东吴", "吴"],
-  孙吴: ["三国吴", "孙吴", "东吴", "吴"],
-  东吴: ["三国吴", "孙吴", "东吴", "吴"],
-  三国吴: ["三国吴", "孙吴", "东吴", "吴"],
+/**
+ * 朝代同义等价表（双向对等，表示同一政权的不同称呼）
+ */
+export const DYNASTY_EQUIVALENTS: Record<string, string[]> = {
+  民国: ["中华民国", "民国"],
+  中华民国: ["中华民国", "民国"],
+  曹魏: ["三国魏", "曹魏"],
+  三国魏: ["三国魏", "曹魏"],
+  蜀汉: ["三国蜀", "蜀汉"],
+  三国蜀: ["三国蜀", "蜀汉"],
+  孙吴: ["三国吴", "孙吴", "东吴"],
+  东吴: ["三国吴", "孙吴", "东吴"],
+  三国吴: ["三国吴", "孙吴", "东吴"],
   武周: ["周", "武周"],
-  周: ["周", "武周", "北周", "后周"],
-  宋: ["宋", "南宋", "北宋"],
-  南宋: ["宋", "南宋"],
-  北宋: ["宋", "北宋"],
   刘宋: ["刘宋", "宋(刘)", "宋（刘）"],
+  "宋(刘)": ["刘宋", "宋(刘)", "宋（刘）"],
+  "宋（刘）": ["刘宋", "宋(刘)", "宋（刘）"],
   杨吴: ["杨吴", "吴(杨)", "吴（杨）"],
-  马楚: ["马楚", "楚(马)", "楚（马）"]
+  "吴(杨)": ["杨吴", "吴(杨)", "吴（杨）"],
+  "吴（杨）": ["杨吴", "吴(杨)", "吴（杨）"],
+  马楚: ["马楚", "楚(马)", "楚（马）"],
+  "楚(马)": ["马楚", "楚(马)", "楚（马）"],
+  "楚（马）": ["马楚", "楚(马)", "楚（马）"]
 };
 
-function matchDynasty(target: string, eraDynasty: string, eraRawDynasty?: string): boolean {
+/**
+ * 朝代父子层级包含树（单向继承：父朝代向下包含各分期/政权，子朝代不可逆向匹配父代或兄弟代）
+ */
+export const DYNASTY_CHILDREN: Record<string, string[]> = {
+  汉: ["西汉", "东汉"],
+  晋: ["西晋", "东晋"],
+  齐: ["南齐", "北齐"],
+  宋: ["北宋", "南宋"],
+  魏: ["三国魏", "曹魏", "北魏", "西魏", "东魏"],
+  蜀: ["三国蜀", "蜀汉"],
+  吴: ["三国吴", "孙吴", "东吴"],
+  周: ["周", "武周", "北周", "后周"],
+  秦: ["嬴秦", "前秦", "后秦", "西秦"],
+  赵: ["前赵", "后赵"],
+  燕: ["前燕", "后燕", "南燕", "北燕", "西燕"],
+  凉: ["前凉", "后凉", "西凉", "北凉", "南凉"]
+};
+
+/**
+ * 朝代别名映射集合（兼容向后导出）
+ */
+export const DYNASTY_ALIASES: Record<string, string[]> = (() => {
+  const map: Record<string, string[]> = {};
+  for (const [k, list] of Object.entries(DYNASTY_EQUIVALENTS)) {
+    map[k] = [...list];
+  }
+  for (const [parent, children] of Object.entries(DYNASTY_CHILDREN)) {
+    map[parent] = Array.from(new Set([...(map[parent] || [parent]), ...children]));
+  }
+  return map;
+})();
+
+export function matchDynasty(target: string, eraDynasty: string, eraRawDynasty?: string): boolean {
   if (target === eraDynasty || (eraRawDynasty && target === eraRawDynasty)) {
     return true;
   }
-  const aliases = DYNASTY_ALIASES[target];
-  if (aliases) {
-    if (aliases.includes(eraDynasty)) return true;
-    if (eraRawDynasty && aliases.includes(eraRawDynasty)) return true;
+
+  // 1. 同义别名匹配（双向等价，如“曹魏”<=>“三国魏”、“民国”<=>“中华民国”）
+  const equiv = DYNASTY_EQUIVALENTS[target];
+  if (equiv) {
+    if (equiv.includes(eraDynasty) || (eraRawDynasty && equiv.includes(eraRawDynasty))) {
+      return true;
+    }
   }
+
+  // 2. 父朝代向子朝代单向匹配（如 target="汉"，可匹配归属于西汉、东汉的年号）
+  const children = DYNASTY_CHILDREN[target];
+  if (children) {
+    if (children.includes(eraDynasty) || (eraRawDynasty && children.includes(eraRawDynasty))) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -163,12 +180,12 @@ export class ChronologyService {
       }
     }
 
-    // 格式切分：末尾带“年”或纯阿拉伯数字
+    // 格式切分：末尾带“年”或纯阿拉伯/中文数字
     let match: RegExpMatchArray | null = null;
     if (trimmed.endsWith("年")) {
       match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅]+|元)年$/);
     } else {
-      match = trimmed.match(/^(.*?)(\d+)$/);
+      match = trimmed.match(/^(.*?)(\d+|[一二两三四五六七八九十廿卅]+|元)$/);
     }
 
     if (!match) {
@@ -229,6 +246,9 @@ export class ChronologyService {
    * 公历年查询朝代年号（同一年可能存在多个政权或改元并立）
    */
   gregorianToEra(year: number): EraMatchResult[] {
+    if (typeof year !== "number" || !Number.isInteger(year)) {
+      throw new Error(`非法的公历年份: ${year}`);
+    }
     if (year === 0) {
       throw new Error("历史上无公元 0 年");
     }
@@ -288,7 +308,7 @@ export class ChronologyService {
       targetDynasty = arg3;
     }
 
-    if (isNaN(targetEraYear) || targetEraYear <= 0) {
+    if (typeof targetEraYear !== "number" || !Number.isInteger(targetEraYear) || targetEraYear <= 0) {
       throw new Error(`非法的年号年份: ${targetEraYear}`);
     }
 

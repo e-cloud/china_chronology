@@ -15,6 +15,9 @@ export function gregorianToGanzhi(
   year: number,
   ganzhiList: string[] = DEFAULT_GANZHI_LIST
 ): string {
+  if (typeof year !== "number" || !Number.isInteger(year)) {
+    throw new Error(`非法的公历年份: ${year}`);
+  }
   if (year === 0) {
     throw new Error("历史上无公元 0 年");
   }
@@ -38,16 +41,42 @@ export function ganzhiToGregorian(
   endYear: number,
   ganzhiList: string[] = DEFAULT_GANZHI_LIST
 ): number[] {
+  if (typeof startYear !== "number" || !Number.isInteger(startYear) || typeof endYear !== "number" || !Number.isInteger(endYear)) {
+    throw new Error(`非法的公历检索范围: [${startYear}, ${endYear}]`);
+  }
+  if (startYear > endYear) {
+    return [];
+  }
+
   const targetIdx = ganzhiList.indexOf(ganzhi);
   if (targetIdx === -1) {
     throw new Error(`无效的干支名称: "${ganzhi}"`);
   }
 
-  const matchedYears: number[] = [];
-  for (let y = startYear; y <= endYear; y++) {
+  // 快速查找首个匹配年份（最多检索 60 次）
+  let firstMatch: number | null = null;
+  const searchLimit = Math.min(startYear + 60, endYear);
+  for (let y = startYear; y <= searchLimit; y++) {
     if (y === 0) continue;
     if (gregorianToGanzhi(y, ganzhiList) === ganzhi) {
-      matchedYears.push(y);
+      firstMatch = y;
+      break;
+    }
+  }
+
+  if (firstMatch === null) {
+    return [];
+  }
+
+  const matchedYears: number[] = [];
+  let curr = firstMatch;
+  while (curr <= endYear) {
+    matchedYears.push(curr);
+    // 跨越公元无 0 年修正（公元前1年跳到公元1年）
+    if (curr < 0 && curr + 60 >= 0) {
+      curr = curr + 60 + 1;
+    } else {
+      curr += 60;
     }
   }
   return matchedYears;

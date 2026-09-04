@@ -43,6 +43,17 @@ describe("ganzhi utils", () => {
       // 跨公元前后区间（-2 到 2，测试过滤 0 年逻辑）
       const res = ganzhiToGregorian("庚申", -2, 2);
       expect(res).toEqual([-1]);
+      // 跨公元前后区间且在公元后首中（-2 到 10，甲子为公元4年，覆盖 y === 0 跳过分支）
+      expect(ganzhiToGregorian("甲子", -2, 10)).toEqual([4]);
+    });
+
+    it("浮点数与非法范围防护校验", () => {
+      expect(() => gregorianToGanzhi(2024.5)).toThrow("非法的公历年份");
+      expect(() => gregorianToGanzhi(NaN)).toThrow("非法的公历年份");
+      expect(() => ganzhiToGregorian("甲子", 2000.5, 2020)).toThrow("非法的公历检索范围");
+      expect(() => ganzhiToGregorian("甲子", 2000, 2020.5)).toThrow("非法的公历检索范围");
+      expect(ganzhiToGregorian("甲子", 2020, 2000)).toEqual([]);
+      expect(ganzhiToGregorian("甲子", 1980, 1982)).toEqual([]);
     });
   });
 });
