@@ -234,7 +234,7 @@
     },
     {
       "id": 61,
-      "name": "赢秦"
+      "name": "嬴秦"
     },
     {
       "id": 62,
@@ -2532,7 +2532,7 @@
     {
       "id": 151,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "永初",
       "startYear": 420,
@@ -2559,7 +2559,7 @@
     {
       "id": 152,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "景平",
       "startYear": 423,
@@ -2568,7 +2568,7 @@
     {
       "id": 153,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "元嘉",
       "startYear": 424,
@@ -2694,7 +2694,7 @@
     {
       "id": 154,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "孝建",
       "startYear": 454,
@@ -2721,7 +2721,7 @@
     {
       "id": 155,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "大明",
       "startYear": 457,
@@ -2739,7 +2739,7 @@
     {
       "id": 156,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "永光",
       "startYear": 465,
@@ -2748,7 +2748,7 @@
     {
       "id": 157,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "景和",
       "startYear": 465,
@@ -2757,7 +2757,7 @@
     {
       "id": 158,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "泰始",
       "startYear": 465,
@@ -2793,7 +2793,7 @@
     {
       "id": 159,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "泰豫",
       "startYear": 472,
@@ -2802,7 +2802,7 @@
     {
       "id": 160,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "元徽",
       "startYear": 473,
@@ -2820,7 +2820,7 @@
     {
       "id": 161,
       "dynastyId": 28,
-      "dynastyName": "宋(刘)",
+      "dynastyName": "刘宋",
       "rawDynastyName": "宋(刘)",
       "name": "升明",
       "startYear": 477,
@@ -4296,7 +4296,7 @@
     {
       "id": 442,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "武义",
       "startYear": 919,
@@ -4323,7 +4323,7 @@
     {
       "id": 443,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "顺义",
       "startYear": 921,
@@ -4431,7 +4431,7 @@
     {
       "id": 444,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "乾贞",
       "startYear": 927,
@@ -4440,7 +4440,7 @@
     {
       "id": 445,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "乾正",
       "startYear": 927,
@@ -4458,7 +4458,7 @@
     {
       "id": 446,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "太和",
       "startYear": 929,
@@ -4512,7 +4512,7 @@
     {
       "id": 447,
       "dynastyId": 36,
-      "dynastyName": "吴(杨)",
+      "dynastyName": "杨吴",
       "rawDynastyName": "吴(杨)",
       "name": "天祚",
       "startYear": 935,

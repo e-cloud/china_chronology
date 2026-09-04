@@ -62,7 +62,7 @@ T2S_MAP = {
     '黃': '黄', '節': '节', '鴻': '鸿', '綏': '绥', '攝': '摄', '禮': '礼',
     '曆': '历', '昇': '升', '楊': '杨', '烏': '乌', '璽': '玺', '監': '监',
     '緒': '绪', '羅': '罗', '聰': '聪', '視': '视', '詳': '详', '調': '调',
-    '證': '证', '賜': '赐', '贏': '赢', '輔': '辅', '閩': '闽', '雲': '云',
+    '證': '证', '賜': '赐', '贏': '嬴', '輔': '辅', '閩': '闽', '雲': '云',
     '韓': '韩', '馬': '马', '鮮': '鲜', '麗': '丽', '龜': '龟'
 }
 
@@ -72,10 +72,16 @@ def to_simp(text: str) -> str:
     return "".join(T2S_MAP.get(c, c) for c in text).strip()
 
 def normalize_dynasty_name(raw_dynasty: str) -> str:
-    """朝代名称规范化：西汉/东汉在通用输出中归一为'汉'，同时支持西汉/东汉输入"""
+    """朝代名称规范化：西汉/东汉归一为'汉'，宋(刘)归一为'刘宋'，吴(杨)归一为'杨吴'，楚(马)归一为'马楚'"""
     simp = to_simp(raw_dynasty)
     if simp in ("西汉", "东汉"):
         return "汉"
+    if simp in ("宋(刘)", "宋（刘）"):
+        return "刘宋"
+    if simp in ("吴(杨)", "吴（杨）"):
+        return "杨吴"
+    if simp in ("楚(马)", "楚（马）"):
+        return "马楚"
     return simp
 
 def extract_cbdb(db_path: str = DEFAULT_DB_PATH, output_path: str = DEFAULT_OUTPUT_PATH):
