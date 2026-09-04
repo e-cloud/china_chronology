@@ -86,7 +86,7 @@ publishing {
                     developer {
                         id.set("e-cloud")
                         name.set("e-cloud")
-                        email.set("group-e-cloud@users.noreply.github.com")
+                        email.set("e-cloud@users.noreply.github.com")
                     }
                 }
 

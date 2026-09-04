@@ -1,12 +1,14 @@
 # china-chronology
 
-中国历代纪年、公历年份与天干地支双向互转库。基于哈佛大学、台湾中研院与北京大学联合主持的 **CBDB（中国历代人物传记资料库）** 权威 SQLite 数据抽取清洗，支持规范简体中文输入、重名年号消歧、自然语言解析及历史无公元 0 年修正。
+中国历代纪年、公历年份与天干地支双向互转库。基于哈佛大学、台湾中研院与北京大学联合主持的 **CBDB（中国历代人物传记资料库）** 权威 SQLite 数据抽取清洗，支持规范简体中文输入、重名年号消歧、自然语言解析及历史无公元 0 年修正。提供 **TypeScript / JavaScript** 与 **Java 17+** 双生态原生实现。
 
-- **现代化构建**: 基于 Vite 8 构建，开箱即用支持 ESM 与 CommonJS 双模块产物。
-- **纯同步零 IO**: 内置清洗后的历代年号与干支全量数据集，前端浏览器与 Node.js 服务端均可瞬间同步初始化。
+- **多语言双生态**: TypeScript (Vite 8, ESM+CJS) 与 Java 17+ (Gradle, Maven Central) 对等设计，共享同一权威基准数据集。
+- **纯同步零 IO**: 内置清洗后的历代年号与干支全量数据集，前端浏览器、Node.js 与 Java 应用均可极速同步初始化。
 - **智能消歧与解析**: 支持中文纪年（“元”、“十七”、“六十一”）、朝代名称识别（支持全称与简称，如“汉”/“西汉”）、重名年号消歧。
 
 ## 安装
+
+### TypeScript / JavaScript (npm)
 
 ```bash
 npm install china-chronology
@@ -14,7 +16,25 @@ npm install china-chronology
 pnpm add china-chronology
 ```
 
+### Java (Gradle / Maven)
+
+#### Gradle (Kotlin DSL)
+```kotlin
+implementation("io.github.e-cloud:china-chronology:0.1.0")
+```
+
+#### Maven
+```xml
+<dependency>
+    <groupId>io.github.e-cloud</groupId>
+    <artifactId>china-chronology</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
 ## 快速使用
+
+### TypeScript / JavaScript
 
 ```typescript
 import { chronology, gregorianToGanzhi, ganzhiToGregorian } from "china-chronology";
@@ -74,6 +94,32 @@ gregorianToGanzhi(1644); // "甲申"
 gregorianToGanzhi(2024); // "甲辰"
 ```
 
+### Java 17+
+
+```java
+import io.github.ecloud.chronology.Chronology;
+import io.github.ecloud.chronology.model.EraMatchResult;
+import io.github.ecloud.chronology.model.GregorianMatchResult;
+import java.util.List;
+
+// 1. 自然语言年号转公历（支持纯数字、中文数字与“元年”）
+List<GregorianMatchResult> res1 = Chronology.eraToGregorian("明崇祯十七年");
+// res1.get(0).gregorianYear() -> 1644
+// res1.get(0).ganzhi()        -> "甲申"
+
+// 2. 重名年号消歧
+List<GregorianMatchResult> allJianyuan = Chronology.eraToGregorian("建元2年"); // 返回汉、东晋、前秦、南齐全部命中
+List<GregorianMatchResult> hanJianyuan = Chronology.eraToGregorian("建元", 2, "汉"); // 精准锁定汉武帝建元二年 (-139年)
+
+// 3. 公历年份反查朝代年号（1644 年明清交替并存）
+List<EraMatchResult> era1644 = Chronology.gregorianToEra(1644);
+// 包含：明崇祯17年、清顺治元年
+
+// 4. 干支与公历双向互转
+String ganzhi = Chronology.gregorianToGanzhi(1644); // "甲申"
+List<Integer> years = Chronology.ganzhiToGregorian("甲申", 1600, 1650); // [1644]
+```
+
 ## 历法与精度说明
 
 - **公历整年粒度**：本库基于中国历史学公认的标准宏观公历整年换算。中国夏历岁首（正月初一）通常落在公历 1 月 21 日至 2 月 20 日之间，故公历 1 月份在严格农历日历上往往属于前一年末（如公历 1644 年 1 月实为明崇祯十六年癸未年十二月），在微观特定日期考证时需注意此自然岁首漂移。
@@ -83,11 +129,20 @@ gregorianToGanzhi(2024); // "甲辰"
 
 若您有自己的年号数据集，也可以实例化 `ChronologyService`：
 
+**TypeScript / JavaScript**:
 ```typescript
 import { ChronologyService } from "china-chronology";
 import type { ChronologyDataset } from "china-chronology";
 
 const customService = new ChronologyService(myDataset);
+```
+
+**Java**:
+```java
+import io.github.ecloud.chronology.ChronologyService;
+import io.github.ecloud.chronology.model.ChronologyDataset;
+
+ChronologyService customService = new ChronologyService(myDataset);
 ```
 
 ## License
