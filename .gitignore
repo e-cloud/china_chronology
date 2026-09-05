@@ -13,6 +13,7 @@ bin/
 out/
 *.class
 *.jar
+!**/gradle/wrapper/gradle-wrapper.jar
 gradle.properties
 *.gpg
 *.asc

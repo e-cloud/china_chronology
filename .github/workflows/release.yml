@@ -58,6 +58,8 @@ jobs:
 
       - name: 配置 Gradle 缓存与执行权限
         uses: gradle/actions/setup-gradle@v3
+        with:
+          build-root-directory: java
 
       - name: 赋予 gradlew 执行权限
         run: chmod +x java/gradlew
