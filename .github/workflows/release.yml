@@ -1,0 +1,123 @@
+name: Release and Publish (NPM & Sonatype)
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment:
+        description: '版本递增级别 (patch, minor, major) 或指定确切版本号 (如 0.2.0)'
+        required: true
+        default: 'patch'
+        type: string
+      dry_run:
+        description: '是否仅演练测试 (dry-run，不提交、不打tag、不发布)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  release:
+    name: Build Gate, Tagging & Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 用于提交 release commit 与 push tag
+      id-token: write # 用于 NPM 官方 Provenance 签名
+
+    steps:
+      - name: 检出代码 (带完整历史)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 校验主干发布分支
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ] && [ "${{ github.ref }}" != "refs/heads/master" ]; then
+            echo "❌ 错误: 正式发布仅允许在 main/master 主干分支触发！当前分支: ${{ github.ref }}"
+            exit 1
+          fi
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: 配置 Node.js 与缓存
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            ts/pnpm-lock.yaml
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 配置 JDK 17 与 Gradle 环境
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 配置 Gradle 缓存与执行权限
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 赋予 gradlew 执行权限
+        run: chmod +x java/gradlew
+
+      - name: 安装根目录与 TS 目录依赖
+        run: |
+          pnpm install --frozen-lockfile
+          cd ts && pnpm install --frozen-lockfile && cd ..
+
+      # --- 门禁阶段 (必须包含全量构建) ---
+      - name: 运行 TS 门禁 (Lint, Test, Build)
+        run: |
+          cd ts
+          pnpm lint
+          pnpm test
+          pnpm build
+          cd ..
+
+      - name: 运行 Java 门禁 (Spotless, Checkstyle, Test, Build Jar)
+        run: |
+          cd java
+          ./gradlew build
+          cd ..
+
+      # --- 打标与产生 Commit 阶段 ---
+      - name: 配置 Git Bot 用户
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 执行 Dry-Run 演练打标
+        if: ${{ inputs.dry_run }}
+        run: pnpm run release:dry --ci --increment=${{ inputs.increment }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 执行正式打标、产生 Commit、创建 Tag 并推送到 GitHub
+        if: ${{ !inputs.dry_run }}
+        run: pnpm run release --ci --increment=${{ inputs.increment }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- 分发与发布阶段 ---
+      - name: 发布至 NPM Registry (带 Provenance 签名)
+        if: ${{ !inputs.dry_run }}
+        run: |
+          cd ts
+          pnpm publish --no-git-checks --provenance --access public
+          cd ..
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 发布至 Sonatype Central Portal (Maven Central)
+        if: ${{ !inputs.dry_run }}
+        run: |
+          cd java
+          ./gradlew nmcpPublishAggregationToCentralPortal
+          cd ..
+        env:
+          SONATYPE_CENTRAL_USERNAME: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+          SONATYPE_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
